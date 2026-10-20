@@ -8,6 +8,12 @@ export const LoginSchema = z.object({
   password: z.string().min(1),
 });
 
+export const SignupSchema = z.object({
+  email:    z.string().email(),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  name:     z.string().max(100).optional(),
+});
+
 export const CreateDocSchema = z.object({
   title: z.string().max(255).optional(),
 });
