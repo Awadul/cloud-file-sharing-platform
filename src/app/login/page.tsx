@@ -65,9 +65,9 @@ export default function LoginPage() {
             </svg>
           </div>
           <span className="text-xl font-bold text-slate-900 tracking-tight">
-            Ajaia Docs
+            Plainpage
           </span>
-          <span className="text-xs text-slate-500 mt-1">Sign in to your team workspace</span>
+          <span className="text-xs text-slate-500 mt-1">Write clearly. Share simply.</span>
         </div>
 
         <form onSubmit={handleSubmit} noValidate>

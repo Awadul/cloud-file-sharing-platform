@@ -1,14 +1,16 @@
-# Ajaia Docs
+# Plainpage
+
+> **Write clearly. Share simply.**
 
 A modern, lightweight collaborative document editor built for teams. Write rich text documents, keep them organized, import existing files, and securely share them with teammates with fine-grained access control.
 
 ## Live URL
 
-[https://ajaia-docs.vercel.app](https://ajaia-docs.vercel.app) *(updated after deployment)*
+[https://plainpage.vercel.app](https://plainpage.vercel.app) *(updated after deployment)*
 
 ## User Authentication & Accounts
 
-Ajaia Docs supports real user login and registration:
+Plainpage supports real user login and registration:
 - **Any User Sign-In / Sign-Up**: Enter any email address to sign in. New accounts are automatically provisioned in the database.
 - **Pre-Seeded Team Accounts**: For instant testing of multi-user collaboration and permission roles, the login screen includes 1-click quick selection for three accounts:
 
@@ -87,7 +89,7 @@ Max file size: **2 MB**
 ## Technology Stack
 
 - **Framework**: Next.js 16 App Router (React 19), TypeScript strict mode
-- **Styling**: Tailwind CSS v4 (Ajaia corporate palette, responsive grid)
+- **Styling**: Tailwind CSS v4 (Plainpage workspace palette, responsive grid)
 - **Editor**: Tiptap (`@tiptap/react`, StarterKit, Underline)
 - **Database**: Supabase Postgres (PostgreSQL 17, accessed server-side via `@supabase/supabase-js`)
 - **Authentication**: Signed HTTP-only JWT session cookies via `jose`

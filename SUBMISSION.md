@@ -2,11 +2,11 @@
 
 ## Live URL
 
-[https://ajaia-docs.vercel.app](https://ajaia-docs.vercel.app) *(updated after deployment)*
+[https://plainpage.vercel.app](https://plainpage.vercel.app) *(updated after deployment)*
 
 ## User Accounts & Authentication
 
-Ajaia Docs supports real user login and auto-provisioned registration:
+Plainpage supports real user login and auto-provisioned registration:
 - **Any Email Sign-In / Registration**: Enter any email address to sign in or register instantly.
 - **Seeded Team Accounts**: For fast multi-role verification, 1-click select pills are provided on the login page:
 

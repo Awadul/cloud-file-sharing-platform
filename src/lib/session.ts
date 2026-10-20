@@ -5,7 +5,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
-const COOKIE_NAME = 'ajaia_session';
+const COOKIE_NAME = 'plainpage_session';
 const ALG = 'HS256';
 
 function getSecret(): Uint8Array {

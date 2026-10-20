@@ -162,7 +162,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
         />
       )}
 
-      {/* ─── LEFT SIDEBAR (AJAIA MIDNIGHT NAVY #0C1322) ──────────────── */}
+      {/* ─── LEFT SIDEBAR (PLAINPAGE MIDNIGHT NAVY #0C1322) ──────────────── */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0C1322] text-slate-300 flex flex-col justify-between shrink-0 h-screen select-none border-r border-[#152037] transition-transform duration-200 ease-in-out md:sticky md:top-0 md:h-screen md:w-56 md:translate-x-0 ${
           mobileNavOpen ? 'translate-x-0 shadow-2xl' : 'max-md:-translate-x-full'
@@ -170,7 +170,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
       >
         {/* Top: Logo & Navigation */}
         <div className="p-3.5">
-          {/* Ajaia Docs Wordmark + Mobile Close Button */}
+          {/* Plainpage Wordmark + Mobile Close Button */}
           <div className="flex items-center justify-between px-3 py-3 mb-5 text-white">
             <div className="flex items-center gap-2.5">
               <svg
@@ -187,7 +187,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
                 />
               </svg>
               <span className="font-bold text-[15px] tracking-tight text-white font-sans">
-                Ajaia Docs
+                Plainpage
               </span>
             </div>
 
@@ -309,11 +309,11 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
               </svg>
             </button>
             <span className="font-bold text-slate-900 text-sm tracking-tight">
-              Ajaia Docs
+              Plainpage
             </span>
             <span className="text-slate-300">|</span>
             <span className="text-xs text-slate-500 font-normal">
-              {activeTab === 'home' && 'Product overview'}
+              {activeTab === 'home' && 'Workspace overview'}
               {activeTab === 'documents' && 'Your workspace'}
               {activeTab === 'shared' && 'Shared with me'}
             </span>
@@ -367,13 +367,13 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
               <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8 xl:gap-10">
                 {/* ── LEFT COLUMN: HERO HEADLINE & ACTIONS ── */}
                 <div className="w-full lg:w-[310px] xl:w-[360px] shrink-0 pt-1 lg:pt-2">
-                  <h1 className="text-3xl lg:text-[32px] xl:text-[38px] font-extrabold text-slate-900 tracking-tight leading-[1.14]">
-                    Your team’s next great document starts here.
+                  <h1 className="text-3xl lg:text-[34px] xl:text-[40px] font-extrabold text-slate-900 tracking-tight leading-[1.12]">
+                    Write clearly. Share simply.
                   </h1>
 
                   <p className="text-sm text-slate-500 leading-relaxed mt-3.5 max-w-sm">
-                    Ajaia Docs is a lightweight collaborative document editor for teams.
-                    Write rich text documents, keep them organised, import your existing
+                    Plainpage is a modern, focused document workspace for teams.
+                    Write rich text documents, keep them organized, import your existing
                     files, and share them with the right people.
                   </p>
 

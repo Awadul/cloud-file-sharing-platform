@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: { default: 'Ajaia Docs', template: '%s | Ajaia Docs' },
-  description: 'Lightweight collaborative document editor',
+  title: { default: 'Plainpage — Write clearly. Share simply.', template: '%s | Plainpage' },
+  description: 'Write clearly. Share simply. Lightweight collaborative document editor for teams.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

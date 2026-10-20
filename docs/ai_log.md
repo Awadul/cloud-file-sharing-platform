@@ -124,4 +124,21 @@ Running engineering and decision log kept across implementation slices. Serves a
   - `npx tsc --noEmit`: 0 errors.
   - `npm run lint`: 0 errors.
 
+---
+
+## Slice 8: Rebranding to Plainpage ("Write clearly. Share simply.")
+- **Goal**: Rebrand application across user interface, page titles, layout metadata, session cookies, and documentation to Plainpage with the official tagline "Write clearly. Share simply.".
+- **Actions**:
+  - Updated `src/app/layout.tsx`: HTML title set to `Plainpage — Write clearly. Share simply.`, description updated to `"Write clearly. Share simply. Lightweight collaborative document editor for teams."`.
+  - Updated `/login`: Brand wordmark set to `Plainpage`, hero headline set to `"Write clearly. Share simply."`.
+  - Updated `/` Dashboard: Top navigation and sidebar wordmarks updated to `Plainpage`, hero headline and team overview set to `"Write clearly. Share simply."`.
+  - Updated `/docs/[id]`: Back link updated to `← Plainpage`.
+  - Updated `package.json`: Project name set to `"plainpage"`.
+  - Updated `src/lib/session.ts`: Session cookie name set to `plainpage_session`.
+  - Updated `README.md` and `SUBMISSION.md` with new branding and live links.
+- **Verification**:
+  - `npm test`: 34/34 tests passed.
+  - `npx tsc --noEmit`: 0 errors.
+  - `npm run lint`: 0 errors.
+
 
