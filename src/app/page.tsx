@@ -164,8 +164,8 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
 
       {/* ─── LEFT SIDEBAR (AJAIA MIDNIGHT NAVY #0C1322) ──────────────── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0C1322] text-slate-300 flex flex-col justify-between shrink-0 h-screen select-none border-r border-[#152037] transition-transform duration-200 ease-in-out md:static md:w-56 md:translate-x-0 ${
-          mobileNavOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0C1322] text-slate-300 flex flex-col justify-between shrink-0 h-screen select-none border-r border-[#152037] transition-transform duration-200 ease-in-out md:sticky md:top-0 md:h-screen md:w-56 md:translate-x-0 ${
+          mobileNavOpen ? 'translate-x-0 shadow-2xl' : 'max-md:-translate-x-full'
         }`}
       >
         {/* Top: Logo & Navigation */}
@@ -365,20 +365,20 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
           {activeTab === 'home' && (
             <div className="space-y-12">
               {/* 2-Column Row: Left Hero + Right Workspace Card */}
-              <div className="flex flex-col xl:flex-row items-start gap-8 lg:gap-10">
+              <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8 xl:gap-10">
                 {/* ── LEFT COLUMN: HERO HEADLINE & ACTIONS ── */}
-                <div className="w-full xl:w-[38%] shrink-0 pt-1 lg:pt-3">
-                  <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-slate-900 tracking-tight leading-[1.14]">
+                <div className="w-full lg:w-[310px] xl:w-[360px] shrink-0 pt-1 lg:pt-2">
+                  <h1 className="text-3xl lg:text-[32px] xl:text-[38px] font-extrabold text-slate-900 tracking-tight leading-[1.14]">
                     Your team’s next great document starts here.
                   </h1>
 
-                  <p className="text-sm text-slate-500 leading-relaxed mt-4 sm:mt-5 max-w-sm">
+                  <p className="text-sm text-slate-500 leading-relaxed mt-3.5 max-w-sm">
                     Ajaia Docs is a lightweight collaborative document editor for teams.
                     Write rich text documents, keep them organised, import your existing
                     files, and share them with the right people.
                   </p>
 
-                  <div className="flex items-center gap-3 mt-6 sm:mt-7">
+                  <div className="flex items-center gap-3 mt-5 sm:mt-6">
                     <Button
                       variant="primary"
                       size="md"
@@ -402,7 +402,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
                 </div>
 
                 {/* ── RIGHT COLUMN: YOUR WORKSPACE CARD ── */}
-                <div className="flex-1 min-w-0 w-full bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5 sm:p-6 lg:p-7">
+                <div className="flex-1 min-w-0 w-full bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5 sm:p-6">
                   {/* Card Header Row */}
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-2">
                     <div>
