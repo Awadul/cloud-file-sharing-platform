@@ -6,7 +6,7 @@
 
 ## Demo Credentials
 
-**Shared password**: `[fill in before submission]`
+**Shared password**: `demo123`
 
 | User  | Email            |
 |-------|-----------------|
