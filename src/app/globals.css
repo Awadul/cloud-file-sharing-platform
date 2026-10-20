@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: theme(colors.indigo.600);
-  --color-primary-hover: theme(colors.indigo.700);
+  --color-primary: theme(colors.blue.600);
+  --color-primary-hover: theme(colors.blue.700);
   --color-danger: theme(colors.red.600);
   --color-success: theme(colors.emerald.600);
   --color-warning: theme(colors.amber.600);
@@ -10,7 +10,7 @@
 
 /* Focus ring: replaces browser default but stays accessible */
 *:focus-visible {
-  outline: 2px solid theme(colors.indigo.500);
+  outline: 2px solid theme(colors.blue.500);
   outline-offset: 2px;
 }
 

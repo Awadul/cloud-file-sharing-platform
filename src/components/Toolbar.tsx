@@ -24,9 +24,9 @@ function ToolbarButton({ onClick, isActive, label, children }: ToolbarButtonProp
       title={label}
       className={[
         'flex items-center justify-center w-8 h-8 rounded-md text-sm font-medium transition-colors',
-        'focus-visible:ring-2 focus-visible:ring-indigo-500 focus:outline-none',
+        'focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none',
         isActive
-          ? 'bg-indigo-50 text-indigo-700'
+          ? 'bg-blue-50 text-blue-700 font-semibold'
           : 'text-slate-600 hover:bg-slate-100',
       ].join(' ')}
     >

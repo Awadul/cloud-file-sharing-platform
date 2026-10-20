@@ -3,9 +3,9 @@ import React from 'react';
 type BadgeVariant = 'owner' | 'editor' | 'viewer';
 
 const BADGE_CLASSES: Record<BadgeVariant, string> = {
-  owner:  'bg-indigo-50 text-indigo-700 border-indigo-200',
-  editor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  viewer: 'bg-slate-100 text-slate-600 border-slate-200',
+  owner:  'bg-blue-50 text-blue-600 border-blue-200/80',
+  editor: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+  viewer: 'bg-purple-50 text-purple-700 border-purple-200/80',
 };
 
 const BADGE_LABELS: Record<BadgeVariant, string> = {
