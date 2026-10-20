@@ -1,124 +1,102 @@
-'use client';
-
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import PlainpageLogo from '@/components/PlainpageLogo';
-
-// Metadata can't be exported from client components,
-// so it lives in a separate server wrapper if needed.
-// This page is intentionally a client component for the form state.
-
-const DEMO_USERS = [
-  { name: 'Alice', email: 'alice@demo.test' },
-  { name: 'Bob',   email: 'bob@demo.test'   },
-  { name: 'Carol', email: 'carol@demo.test'  },
-];
-
+"use client";
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import PlainpageLogo from "@/components/PlainpageLogo";
+import { Button } from "@/components/Button";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail]       = useState(DEMO_USERS[0].email);
-  const [password, setPassword] = useState('');
-  const [error, setError]       = useState('');
-  const [loading, setLoading]   = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
+  const [email, setEmail] = useState(""),
+    [password, setPassword] = useState(""),
+    [error, setError] = useState(""),
+    [loading, setLoading] = useState(false);
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    setError('');
     setLoading(true);
-
+    setError("");
     try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const r = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error?.message ?? 'Login failed');
+      if (!r.ok) {
+        const d = await r.json();
+        setError(d.error?.message || "Could not sign in. Please try again.");
         return;
       }
-      router.push('/');
+      router.push("/");
     } catch {
-      setError('Network error. Please try again.');
+      setError("Unable to connect. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
   }
-
   return (
-    <main className="min-h-screen bg-[#F4F6FB] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-white border border-slate-200/90 rounded-2xl shadow-sm p-8">
-        {/* Official Plainpage Logo */}
-        <div className="mb-7 text-center flex flex-col items-center">
-          <PlainpageLogo size="lg" showTagline={true} />
-        </div>
-
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="mb-4">
-            <label htmlFor="email-input" className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Email address
-            </label>
+    <main className="pp-login">
+      <Link
+        href="/"
+        className="pp-login-brand"
+        aria-label="Plainpage overview"
+      >
+        <PlainpageLogo size="lg" />
+      </Link>
+      <div className="pp-login-layout">
+        <section className="pp-login-copy">
+          <h1>Your team’s next great document <span className="pp-gradient-text">starts here.</span></h1>
+          <p>
+            Plainpage is a lightweight document editor for teams. Write rich
+            text, keep it organized, import your files, and share with the right
+            people.
+          </p>
+          <div>
+            <Link href="/">
+              <ArrowLeft size={14} className="inline mr-2" />
+              Explore Plainpage
+            </Link>
+          </div>
+        </section>
+        <section className="pp-signin">
+          <h2>Welcome to Plainpage</h2>
+          <p>Sign in to your workspace and pick up where you left off.</p>
+          <form onSubmit={submit}>
+            <label htmlFor="email-input">Email address</label>
             <input
+              className="input"
               id="email-input"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@company.com"
+              autoComplete="email"
               required
-              className="w-full border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none"
             />
-
-            {/* Quick Team Sign-In Selection */}
-            <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-              <span className="text-[11px] text-slate-400">Quick select:</span>
-              {DEMO_USERS.map((u) => (
-                <button
-                  key={u.email}
-                  type="button"
-                  onClick={() => {
-                    setEmail(u.email);
-                    setPassword('demo123');
-                  }}
-                  className={`text-[11px] px-2 py-0.5 rounded font-medium transition-colors ${
-                    email === u.email
-                      ? 'bg-blue-100 text-blue-700 font-semibold'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {u.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Password
-            </label>
+            <label htmlFor="password">Password</label>
             <input
+              className="input"
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              placeholder="Your password"
               autoComplete="current-password"
-              className="w-full border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none"
-              placeholder="••••••••"
+              required
             />
             {error && (
-              <p role="alert" className="mt-1.5 text-xs text-red-600 font-medium">{error}</p>
+              <p className="pp-signin-error" role="alert">
+                {error}
+              </p>
             )}
-          </div>
-
-          <button
-            id="sign-in-btn"
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg py-2.5 text-sm transition-colors shadow-xs disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {loading ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
+            <Button type="submit" id="sign-in-btn" loading={loading}>
+              {loading ? "Signing in…" : "Sign in"}
+              {!loading && <ArrowRight size={16} />}
+            </Button>
+          </form>
+          <p className="pp-login-note">
+            New here? Sign in with your email to create your workspace.
+          </p>
+        </section>
       </div>
     </main>
   );

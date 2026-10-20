@@ -1,0 +1,3 @@
+'use client';
+import {useEffect} from 'react';
+export default function LandingMotion(){useEffect(()=>{if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;const elements=document.querySelectorAll<HTMLElement>('[data-animate]');const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('pp-revealed');observer.unobserve(entry.target);}});},{threshold:.12});elements.forEach(el=>{el.classList.add('pp-reveal');observer.observe(el);});return()=>{observer.disconnect();elements.forEach(el=>el.classList.remove('pp-reveal'));};},[]);return null;}
