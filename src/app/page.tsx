@@ -28,6 +28,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
   const [fetchError, setFetchError] = useState('');
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [sharingDoc, setSharingDoc] = useState<{ id: string; title: string } | null>(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { toasts, toast, dismiss } = useToast();
 
   const fetchDocs = useCallback(async () => {
@@ -152,28 +153,54 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
 
   return (
     <div className="min-h-screen bg-[#F4F6FB] flex text-slate-800 antialiased font-sans">
+      {/* Mobile Drawer Backdrop */}
+      {mobileNavOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 md:hidden transition-opacity"
+          onClick={() => setMobileNavOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* ─── LEFT SIDEBAR (AJAIA MIDNIGHT NAVY #0C1322) ──────────────── */}
-      <aside className="w-56 bg-[#0C1322] text-slate-300 flex flex-col justify-between shrink-0 sticky top-0 h-screen select-none border-r border-[#152037]">
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0C1322] text-slate-300 flex flex-col justify-between shrink-0 h-screen select-none border-r border-[#152037] transition-transform duration-200 ease-in-out md:static md:w-56 md:translate-x-0 ${
+          mobileNavOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+        }`}
+      >
         {/* Top: Logo & Navigation */}
         <div className="p-3.5">
-          {/* Ajaia Docs Wordmark */}
-          <div className="flex items-center gap-2.5 px-3 py-3 mb-5 text-white">
-            <svg
-              className="w-5 h-5 text-blue-400 shrink-0"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.9}
+          {/* Ajaia Docs Wordmark + Mobile Close Button */}
+          <div className="flex items-center justify-between px-3 py-3 mb-5 text-white">
+            <div className="flex items-center gap-2.5">
+              <svg
+                className="w-5 h-5 text-blue-400 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.9}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                />
+              </svg>
+              <span className="font-bold text-[15px] tracking-tight text-white font-sans">
+                Ajaia Docs
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen(false)}
+              className="md:hidden p-1 text-slate-400 hover:text-white rounded-md transition-colors"
+              aria-label="Close navigation"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-              />
-            </svg>
-            <span className="font-bold text-[15px] tracking-tight text-white font-sans">
-              Ajaia Docs
-            </span>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
           {/* Navigation Links */}
@@ -181,6 +208,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
             <button
               onClick={() => {
                 setActiveTab('home');
+                setMobileNavOpen(false);
                 router.push('/');
               }}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
@@ -198,6 +226,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
             <button
               onClick={() => {
                 setActiveTab('documents');
+                setMobileNavOpen(false);
                 router.push('/documents');
               }}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
@@ -215,6 +244,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
             <button
               onClick={() => {
                 setActiveTab('shared');
+                setMobileNavOpen(false);
                 router.push('/shared');
               }}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
@@ -248,7 +278,10 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
           </div>
 
           <button
-            onClick={() => setShowSettingsModal(true)}
+            onClick={() => {
+              setShowSettingsModal(true);
+              setMobileNavOpen(false);
+            }}
             className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-[#121c32] transition-colors"
           >
             <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -263,8 +296,18 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
       {/* ─── MAIN CONTENT ────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
-        <header className="h-13 bg-white border-b border-slate-200/80 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20">
-          <div className="flex items-center gap-3">
+        <header className="h-14 bg-white border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 flex items-center justify-between shrink-0 sticky top-0 z-20">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen(true)}
+              className="md:hidden p-1.5 -ml-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+              aria-label="Open navigation menu"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
             <span className="font-bold text-slate-900 text-sm tracking-tight">
               Ajaia Docs
             </span>
@@ -276,23 +319,23 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="text-xs text-slate-400 font-normal">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <span className="text-xs text-slate-400 font-normal hidden sm:inline">
               Interactive demo
             </span>
             {activeTab === 'home' ? (
               <Button
                 variant="primary"
+                size="sm"
                 onClick={() => setActiveTab('documents')}
-                className="text-xs px-3.5 py-1.5 font-semibold"
               >
                 Open demo
               </Button>
             ) : (
               <Button
                 variant="primary"
+                size="sm"
                 onClick={() => setActiveTab('home')}
-                className="text-xs px-3.5 py-1.5 font-semibold"
               >
                 Back to overview
               </Button>
@@ -301,7 +344,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
         </header>
 
         {/* Page Content Body */}
-        <main className="p-8 max-w-7xl w-full mx-auto pb-16">
+        <main className="p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-16">
           {fetchError && (
             <div className="mb-6 bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center justify-between text-xs text-red-700 shadow-xs">
               <span>{fetchError}</span>
@@ -322,24 +365,24 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
           {activeTab === 'home' && (
             <div className="space-y-12">
               {/* 2-Column Row: Left Hero + Right Workspace Card */}
-              <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-10">
-                {/* ── LEFT COLUMN: HERO HEADLINE & ACTIONS (38% width) ── */}
-                <div className="w-full lg:w-[38%] shrink-0 pt-3">
-                  <h1 className="text-4xl lg:text-[42px] font-extrabold text-slate-900 tracking-tight leading-[1.12]">
+              <div className="flex flex-col xl:flex-row items-start gap-8 lg:gap-10">
+                {/* ── LEFT COLUMN: HERO HEADLINE & ACTIONS ── */}
+                <div className="w-full xl:w-[38%] shrink-0 pt-1 lg:pt-3">
+                  <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-slate-900 tracking-tight leading-[1.14]">
                     Your team’s next great document starts here.
                   </h1>
 
-                  <p className="text-sm text-slate-500 leading-relaxed mt-5 max-w-sm">
+                  <p className="text-sm text-slate-500 leading-relaxed mt-4 sm:mt-5 max-w-sm">
                     Ajaia Docs is a lightweight collaborative document editor for teams.
                     Write rich text documents, keep them organised, import your existing
                     files, and share them with the right people.
                   </p>
 
-                  <div className="flex items-center gap-3 mt-7">
+                  <div className="flex items-center gap-3 mt-6 sm:mt-7">
                     <Button
                       variant="primary"
+                      size="md"
                       onClick={() => setActiveTab('documents')}
-                      className="px-5 py-2.5 text-xs font-semibold shadow-xs"
                     >
                       Open demo
                     </Button>
@@ -348,9 +391,9 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
                       href="https://github.com"
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2.5 rounded-lg text-xs shadow-xs transition-colors"
+                      className="inline-flex items-center justify-center gap-2 border border-slate-200/90 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 font-semibold h-9 px-3.5 text-xs rounded-lg shadow-xs transition-colors shrink-0 whitespace-nowrap"
                     >
-                      <svg className="w-4 h-4 text-slate-800" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 text-slate-700 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                         <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                       </svg>
                       <span>View source</span>
@@ -359,9 +402,9 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
                 </div>
 
                 {/* ── RIGHT COLUMN: YOUR WORKSPACE CARD ── */}
-                <div className="flex-1 min-w-0 bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 lg:p-7">
+                <div className="flex-1 min-w-0 w-full bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5 sm:p-6 lg:p-7">
                   {/* Card Header Row */}
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-2">
                     <div>
                       <h2 className="text-xl lg:text-2xl font-bold text-slate-900 tracking-tight">
                         Your workspace
@@ -371,29 +414,31 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <Button
-                        id="new-doc-btn"
-                        variant="primary"
-                        loading={creating}
-                        onClick={handleCreateDoc}
-                        className="text-xs font-semibold px-3 py-1.5"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        <span>New document</span>
-                      </Button>
+                    <div className="flex flex-col sm:items-end gap-1 shrink-0">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button
+                          id="new-doc-btn"
+                          variant="primary"
+                          size="md"
+                          loading={creating}
+                          onClick={handleCreateDoc}
+                        >
+                          <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                          </svg>
+                          <span>New document</span>
+                        </Button>
 
-                      <UploadButton
-                        onSuccess={(id) => router.push(`/docs/${id}`)}
-                        hideHint
-                      />
+                        <UploadButton
+                          onSuccess={(id) => router.push(`/docs/${id}`)}
+                          hideHint
+                          size="md"
+                        />
+                      </div>
+                      <span className="text-[11px] text-slate-400 select-none">
+                        Supports .txt, .md, .docx · up to 2 MB
+                      </span>
                     </div>
-                  </div>
-
-                  <div className="text-right text-[10px] text-slate-400 mb-5">
-                    Supports .txt, .md, .docx · up to 2 MB
                   </div>
 
                   {/* My Documents Section */}
@@ -478,7 +523,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
           {/* ════ VIEW 2: DOCUMENTS TAB ════ */}
           {activeTab === 'documents' && (
             <div className="space-y-6">
-              <div className="flex items-start justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                 <div>
                   <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
                     Your workspace
@@ -488,33 +533,35 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <Button
-                    id="new-doc-btn"
-                    variant="primary"
-                    loading={creating}
-                    onClick={handleCreateDoc}
-                    className="text-xs font-semibold px-3 py-1.5"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    <span>New document</span>
-                  </Button>
-                  <UploadButton
-                    onSuccess={(id) => router.push(`/docs/${id}`)}
-                    hideHint
-                  />
+                <div className="flex flex-col sm:items-end gap-1 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      id="new-doc-btn"
+                      variant="primary"
+                      size="md"
+                      loading={creating}
+                      onClick={handleCreateDoc}
+                    >
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                      <span>New document</span>
+                    </Button>
+                    <UploadButton
+                      onSuccess={(id) => router.push(`/docs/${id}`)}
+                      hideHint
+                      size="md"
+                    />
+                  </div>
+                  <span className="text-[11px] text-slate-400 select-none">
+                    Supports .txt, .md, .docx · up to 2 MB
+                  </span>
                 </div>
               </div>
 
-              <div className="text-right text-[10px] text-slate-400 -mt-4">
-                Supports .txt, .md, .docx · up to 2 MB
-              </div>
-
               {/* Search Bar + Local Status */}
-              <div className="flex items-center justify-between pt-1">
-                <div className="relative w-72">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <div className="relative w-full sm:w-72">
                   <svg className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                   </svg>
@@ -526,7 +573,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
                     className="w-full bg-white border border-slate-200/90 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xs"
                   />
                 </div>
-                <span className="text-[11px] text-slate-400">
+                <span className="text-[11px] text-slate-400 shrink-0">
                   Sample documents · saved locally
                 </span>
               </div>
@@ -555,7 +602,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
           {/* ════ VIEW 3: SHARED TAB ════ */}
           {activeTab === 'shared' && (
             <div className="space-y-6">
-              <div className="flex items-start justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                 <div>
                   <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
                     Shared with me
@@ -565,33 +612,35 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <Button
-                    id="new-doc-btn"
-                    variant="primary"
-                    loading={creating}
-                    onClick={handleCreateDoc}
-                    className="text-xs font-semibold px-3 py-1.5"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    <span>New document</span>
-                  </Button>
-                  <UploadButton
-                    onSuccess={(id) => router.push(`/docs/${id}`)}
-                    hideHint
-                  />
+                <div className="flex flex-col sm:items-end gap-1 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      id="new-doc-btn"
+                      variant="primary"
+                      size="md"
+                      loading={creating}
+                      onClick={handleCreateDoc}
+                    >
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                      <span>New document</span>
+                    </Button>
+                    <UploadButton
+                      onSuccess={(id) => router.push(`/docs/${id}`)}
+                      hideHint
+                      size="md"
+                    />
+                  </div>
+                  <span className="text-[11px] text-slate-400 select-none">
+                    Supports .txt, .md, .docx · up to 2 MB
+                  </span>
                 </div>
               </div>
 
-              <div className="text-right text-[10px] text-slate-400 -mt-4">
-                Supports .txt, .md, .docx · up to 2 MB
-              </div>
-
               {/* Search Bar + Local Status */}
-              <div className="flex items-center justify-between pt-1">
-                <div className="relative w-72">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <div className="relative w-full sm:w-72">
                   <svg className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                   </svg>
@@ -603,7 +652,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
                     className="w-full bg-white border border-slate-200/90 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xs"
                   />
                 </div>
-                <span className="text-[11px] text-slate-400">
+                <span className="text-[11px] text-slate-400 shrink-0">
                   Sample documents · saved locally
                 </span>
               </div>

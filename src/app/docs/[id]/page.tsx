@@ -105,7 +105,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-20">
-        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-2.5 sm:gap-4">
           <Link href="/" className="text-sm text-slate-500 hover:text-slate-700 shrink-0">
             ← Docs
           </Link>
