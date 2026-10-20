@@ -7,6 +7,7 @@ import { Button } from '@/components/Button';
 import { UploadButton } from '@/components/UploadButton';
 import { ShareDialog } from '@/components/ShareDialog';
 import { Toast, useToast } from '@/components/Toast';
+import PlainpageLogo from '@/components/PlainpageLogo';
 
 interface CurrentUser {
   userId: string;
@@ -170,26 +171,9 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
       >
         {/* Top: Logo & Navigation */}
         <div className="p-3.5">
-          {/* Plainpage Wordmark + Mobile Close Button */}
-          <div className="flex items-center justify-between px-3 py-3 mb-5 text-white">
-            <div className="flex items-center gap-2.5">
-              <svg
-                className="w-5 h-5 text-blue-400 shrink-0"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.9}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-                />
-              </svg>
-              <span className="font-bold text-[15px] tracking-tight text-white font-sans">
-                Plainpage
-              </span>
-            </div>
+          {/* Plainpage Official Logo + Mobile Close Button */}
+          <div className="flex items-center justify-between px-3 py-2.5 mb-5 text-white">
+            <PlainpageLogo size="md" theme="dark" />
 
             <button
               type="button"
@@ -308,9 +292,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               </svg>
             </button>
-            <span className="font-bold text-slate-900 text-sm tracking-tight">
-              Plainpage
-            </span>
+            <PlainpageLogo size="sm" />
             <span className="text-slate-300">|</span>
             <span className="text-xs text-slate-500 font-normal">
               {activeTab === 'home' && 'Workspace overview'}
@@ -367,6 +349,9 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
               <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8 xl:gap-10">
                 {/* ── LEFT COLUMN: HERO HEADLINE & ACTIONS ── */}
                 <div className="w-full lg:w-[310px] xl:w-[360px] shrink-0 pt-1 lg:pt-2">
+                  <div className="mb-3.5">
+                    <PlainpageLogo size="lg" />
+                  </div>
                   <h1 className="text-3xl lg:text-[34px] xl:text-[40px] font-extrabold text-slate-900 tracking-tight leading-[1.12]">
                     Write clearly. Share simply.
                   </h1>

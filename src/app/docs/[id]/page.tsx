@@ -8,6 +8,7 @@ import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { ShareDialog } from '@/components/ShareDialog';
 import { Toast, useToast } from '@/components/Toast';
+import PlainpageLogo from '@/components/PlainpageLogo';
 
 // Dynamically import editor to keep dashboard fast and avoid SSR issues
 const Editor = dynamic(() => import('@/components/Editor').then((m) => m.Editor), {
@@ -106,8 +107,12 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-2.5 sm:gap-4">
-          <Link href="/" className="text-sm font-medium text-slate-500 hover:text-slate-800 shrink-0">
-            ← Plainpage
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors shrink-0"
+          >
+            <span className="text-slate-400">←</span>
+            <PlainpageLogo size="sm" />
           </Link>
 
           {loading ? (
