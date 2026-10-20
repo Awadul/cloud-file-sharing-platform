@@ -11,6 +11,7 @@ export type ErrorCode =
   | 'UNSUPPORTED_TYPE'
   | 'TOO_LARGE'
   | 'USER_NOT_FOUND'
+  | 'RATE_LIMITED'
   | 'INTERNAL';
 
 const STATUS_MAP: Record<ErrorCode, number> = {
@@ -21,6 +22,7 @@ const STATUS_MAP: Record<ErrorCode, number> = {
   UNSUPPORTED_TYPE: 415,
   TOO_LARGE:        413,
   USER_NOT_FOUND:   404,
+  RATE_LIMITED:     429,
   INTERNAL:         500,
 };
 

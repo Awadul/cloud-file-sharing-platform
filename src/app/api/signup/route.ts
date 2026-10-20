@@ -22,48 +22,19 @@ export async function POST(req: NextRequest) {
   const supabase = await createClient();
 
   // 1. First attempt standard sign up
-  let { data, error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: normalizedEmail,
     password,
     options: {
+      emailRedirectTo: `${req.nextUrl.origin}/auth/callback`,
       data: {
         name: formattedName,
       },
     },
   });
 
-  // 2. Fallback for email rate limit or unconfirmed project setup: use Admin API to provision with pre-confirmed email
-  if (error && (error.message.toLowerCase().includes('rate limit') || error.status === 429)) {
-    const { data: adminUser, error: adminError } = await db.auth.admin.createUser({
-      email: normalizedEmail,
-      password,
-      email_confirm: true,
-      user_metadata: { name: formattedName },
-    });
-
-    if (adminError) {
-      return apiError('VALIDATION', adminError.message);
-    }
-
-    if (adminUser?.user) {
-      // Sign in through SSR client so cookies are written
-      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-        email: normalizedEmail,
-        password,
-      });
-
-      if (!loginError && loginData?.user) {
-        data = {
-          user: loginData.user,
-          session: loginData.session,
-        };
-        error = null;
-      }
-    }
-  }
-
   if (error) {
-    return apiError('VALIDATION', error.message);
+    return apiError(error.status === 429 ? 'RATE_LIMITED' : 'VALIDATION', error.status === 429 ? 'Too many sign-up attempts. Please wait before trying again.' : error.message);
   }
 
   const user = data?.user;

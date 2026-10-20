@@ -2419,3 +2419,24 @@ summary {
   .pp-auth-panel { margin-top:40px; }
   .pp-auth-intro h1 { font-size:28px; }
 }
+
+/* A single ink spiral frames account access without competing with the form. */
+.pp-auth { position:relative; isolation:isolate; overflow:clip; }
+.pp-auth-orbit { position:absolute; z-index:-1; pointer-events:none; width:min(66vw,760px); aspect-ratio:1; left:-28%; top:12%; opacity:.14; }
+.pp-auth-orbit svg { width:100%; height:100%; transform-origin:center; animation:pp-auth-orbit 2.4s cubic-bezier(.23,1,.32,1) 2; }
+.pp-auth-orbit path { stroke:var(--auth-blue); stroke-width:1.25; stroke-linecap:round; }
+.pp-auth-header { animation:pp-auth-arrive 240ms cubic-bezier(.23,1,.32,1) both; }
+.pp-auth-panel { animation:pp-auth-arrive 280ms cubic-bezier(.23,1,.32,1) both; }
+.pp-auth-form, .pp-auth-confirmation { animation:pp-auth-arrive 200ms cubic-bezier(.23,1,.32,1) both; }
+.pp-auth .pp-auth-submit { transition:transform 120ms cubic-bezier(.23,1,.32,1), opacity 120ms; }
+.pp-auth .pp-auth-submit:active:not(:disabled) { transform:scale(.98); }
+.pp-auth[data-departing] .pp-auth-orbit { animation:pp-auth-spiral-away 280ms cubic-bezier(.23,1,.32,1) forwards; }
+@keyframes pp-auth-arrive { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pp-auth-orbit { from { transform:rotate(-30deg) scale(.96); } to { transform:rotate(0deg) scale(1); } }
+@keyframes pp-auth-spiral-away { to { transform:rotate(18deg) scale(1.08); opacity:0; } }
+@media(max-width:600px) { .pp-auth-orbit { width:100vw; left:-70%; top:22%; opacity:.08; } }
+@media(prefers-reduced-motion:reduce) {
+  .pp-auth-header, .pp-auth-panel, .pp-auth-form, .pp-auth-confirmation, .pp-auth-orbit svg, .pp-auth[data-departing] .pp-auth-orbit { animation:none; }
+  .pp-auth .pp-auth-submit { transition:none; }
+  .pp-auth .pp-auth-submit:active:not(:disabled) { transform:none; }
+}
