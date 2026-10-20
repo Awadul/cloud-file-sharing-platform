@@ -279,17 +279,11 @@ export function DashboardContent({
             className={`card pp-document-card ${view === "list" ? "pp-list-card" : ""}`}
             key={d.id}
           >
-            <Link
-              href={`/docs/${d.id}`}
-              aria-label={`Open ${d.title}`}
-              className="pp-doc-preview"
-            >
-              <FileText size={24} strokeWidth={1.6} className="pp-document-symbol" aria-hidden="true"/>
-            </Link>
             <div className="pp-doc-card-body">
               <div className="pp-doc-card-title">
-                <Link href={`/docs/${d.id}`}>
-                  {d.title || "Untitled document"}
+                <Link href={`/docs/${d.id}`} className="pp-doc-open">
+                  <span className="pp-doc-name">{d.title || "Untitled document"}</span>
+                  <span className={`pp-doc-excerpt ${d.excerpt?.trim() ? "" : "pp-doc-excerpt-empty"}`}>{d.excerpt?.trim() || "No text yet."}</span>
                 </Link>
                 <KebabMenu
                   docId={d.id}

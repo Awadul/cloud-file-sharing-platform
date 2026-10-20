@@ -5,6 +5,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import { Toolbar } from "./Toolbar";
+import { activeOutlinePosition, type OutlineHeading } from "@/lib/editor-outline";
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
@@ -43,7 +44,8 @@ export function Editor({
   onSaveStatusChange,
 }: EditorProps) {
   const isReadOnly = role === "viewer";
-  const [headings, setHeadings] = useState<{ text: string; pos: number }[]>([]);
+  const [headings, setHeadings] = useState<OutlineHeading[]>([]);
+  const [activeHeading, setActiveHeading] = useState<number | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const retryCount = useRef(0);
@@ -118,18 +120,26 @@ export function Editor({
 
   useEffect(() => {
     if (!editor) return;
+    let currentHeadings: OutlineHeading[] = [];
+    const updateActiveHeading = () => {
+      setActiveHeading(activeOutlinePosition(currentHeadings, editor.state.selection.from));
+    };
     const updateOutline = () => {
-      const items: { text: string; pos: number }[] = [];
+      const items: OutlineHeading[] = [];
       editor.state.doc.descendants((node, pos) => {
         if (node.type.name === "heading" && node.attrs.level > 1)
           items.push({ text: node.textContent, pos });
       });
+      currentHeadings = items;
       setHeadings(items);
+      updateActiveHeading();
     };
     updateOutline();
     editor.on("update", updateOutline);
+    editor.on("selectionUpdate", updateActiveHeading);
     return () => {
       editor.off("update", updateOutline);
+      editor.off("selectionUpdate", updateActiveHeading);
     };
   }, [editor]);
 
@@ -169,7 +179,9 @@ export function Editor({
               <button
                 type="button"
                 key={`${heading.pos}-${index}`}
+                aria-current={activeHeading === heading.pos ? "location" : undefined}
                 onClick={() => {
+                  setActiveHeading(heading.pos);
                   editor
                     ?.chain()
                     .setTextSelection(heading.pos + 1)
