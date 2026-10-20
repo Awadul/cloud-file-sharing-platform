@@ -13,9 +13,10 @@ Ship a focused, working collaborative document editor that demonstrates full sta
 | Decision | Why | Tradeoff |
 |---|---|---|
 | Next.js App Router | Single deployment unit, server components for initial data, route handlers for API | App Router has async params/cookies — verified against Next.js 16 docs before writing routes |
-| Tiptap JSON in Postgres `jsonb` | Round-trips formatting exactly; easy to inspect and test | Not directly portable — export would need a converter |
-| Supabase + service role key | Fastest correct path; one place to audit access | Not defense in depth — RLS would be the next hardening step |
-| Mocked auth with signed JWT | Reviewers can test sharing in seconds without email flow | Stated clearly throughout; not production auth |
+| Tiptap JSON in Postgres `jsonb` | Round-trips formatting exactly; easy to inspect and test | Not directly portable — export needs a converter |
+| Supabase + service role key | Fastest correct path; one central place to audit access | Not defense in depth — RLS would be the next hardening step |
+| JWT session auth with auto-provisioning | Real registration for any email, plus 1-click select for seeded team accounts | Password verified against shared demo key or 4+ chars; OAuth/magic links would be next step |
+| Auto-provisioning on share | Allows sharing documents with any teammate email immediately | Unregistered users gain access automatically upon first login |
 | Last write wins | Real-time sync is out of scope in this timebox | Concurrent editors can overwrite — documented limitation |
 | Server-side import | Keeps parsing libraries (`mammoth`, `marked`) off the client bundle | Needs buffer handling in Vercel; client-side fallback documented in code |
 | No global state library | Two pages, React state is sufficient | Revisit if real-time is added |
@@ -46,9 +47,8 @@ The browser never talks to Supabase directly. The service role key exists only i
 |---|---|
 | Real-time collaboration | Out of scope; documented as last-write-wins |
 | Comments, version history | Beyond the timebox |
-| Real signup/password reset | Mocked auth serves the demo well; stated clearly |
 | Images/tables in imports | Sanitized out — safe default |
-| PDF export | Stretch goal, not attempted |
+| PDF / Markdown export | Stretch goal, not attempted |
 | Conflict resolution | Documented limitation |
 
 ---

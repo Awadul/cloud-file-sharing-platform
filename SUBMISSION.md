@@ -4,15 +4,19 @@
 
 [https://ajaia-docs.vercel.app](https://ajaia-docs.vercel.app) *(updated after deployment)*
 
-## Demo Credentials
+## User Accounts & Authentication
 
-**Shared password**: `demo123`
+Ajaia Docs supports real user login and auto-provisioned registration:
+- **Any Email Sign-In / Registration**: Enter any email address to sign in or register instantly.
+- **Seeded Team Accounts**: For fast multi-role verification, 1-click select pills are provided on the login page:
 
-| User  | Email            |
-|-------|-----------------|
-| Alice | alice@demo.test |
-| Bob   | bob@demo.test   |
-| Carol | carol@demo.test |
+**Default password for seeded accounts**: `demo123`
+
+| User  | Email            | Default Role in Seed Docs |
+|-------|------------------|---------------------------|
+| Alice | `alice@demo.test`| Document Owner (3 docs)   |
+| Bob   | `bob@demo.test`  | Document Owner & Editor   |
+| Carol | `carol@demo.test`| Teammate (Independent)    |
 
 ## Walkthrough Video
 
@@ -41,31 +45,28 @@ npm test
 
 ## What Works
 
-- Login with any of the 3 seeded accounts
-- Create documents, rename inline, autosave with retry
-- Rich text: bold, italic, underline, H1–H3, bullet list, numbered list
-- Upload `.txt`, `.md`, `.docx` (max 2 MB) → becomes editable document
-- Share by email with editor or viewer role
-- Change role after sharing (immediate save)
-- Remove access with confirm step
-- Dashboard: two separate sections (My documents / Shared with me) with role badges
-- Viewer role: read-only enforced on both UI and server
-- 404 and 403 error pages for document routes
+- **User Authentication**: Sign in with any email address; new accounts auto-provision. Quick-select for seeded team accounts.
+- **Document Creation & Editing**: Create documents, inline rename, debounced autosave (800ms) with failure retries and status indicators.
+- **Rich Text Formatting**: Bold, italic, underline, H1–H3, bullet lists, numbered lists with accessible active state indicators.
+- **File Import**: Multi-format file upload (`.txt`, `.md`, `.docx` up to 2 MB) converted into editable Tiptap documents.
+- **Scalable File Sharing**: Share documents with any teammate by email with `Editor` or `Viewer` role. If the invited user is new, their account is provisioned automatically.
+- **Access Management**: Instant role upgrades/downgrades and access revocation with confirmation dialog.
+- **Document Deletion**: Document owners can delete documents via row kebab action menu with confirmation step.
+- **Dual Section Dashboard**: Distinct views for "My documents" and "Shared with me" with role badges, excerpt previews, and timestamps.
+- **Role Enforcement**: Viewers receive read-only mode in the editor; server-side gate enforces permissions on every request.
+- **Responsive Layout**: Midnight Space Navy rail, sticky on desktop, mobile slide-over drawer with hamburger toggle, and responsive table scrolling.
 
-## What Is Incomplete / Intentionally Cut
+## Deliberate Cuts
 
 | Feature | Status | Reason |
 |---|---|---|
-| Real-time collaboration | Cut | Out of scope; documented as last-write-wins |
-| Real auth (signup/reset) | Cut | Mocked auth serves demo; stated clearly |
-| Version history | Cut | Beyond timebox |
-| Export to Markdown | Not attempted | Stretch goal; core features took priority |
-| Image/table import | Cut | Sanitized out — safe default |
+| Real-time multi-cursor collaboration | Cut | Out of scope for this timebox; documented as last-write-wins |
+| Version history & diffing | Cut | Stored snapshot history is beyond the initial milestone |
+| Export to Markdown | Cut | Stretch goal; core editing, sharing, and UX prioritized |
+| Images/tables in imports | Sanitized | Security-first approach; complex tables sanitized out |
 
 ## What I Would Build Next (2–4 hours)
 
-1. **Export to Markdown** — stretch goal, `@tiptap/html` + `turndown`
-2. **Supabase Row Level Security** — add RLS policies as a defense-in-depth layer
-3. **Delete document** — button with confirm dialog, already wired server-side
-4. **Better mobile layout** — toolbar scrolling, responsive tables
-5. **Real-time presence** — WebSocket or Supabase Realtime for multi-user awareness
+1. **Export to Markdown / PDF** — `@tiptap/html` + `turndown` converter
+2. **Supabase Row Level Security (RLS)** — Add database-level RLS policies as defense-in-depth
+3. **Real-time Presence** — WebSockets or Supabase Realtime channel for live viewer/editor presence avatars

@@ -12,7 +12,8 @@
 2. **Tiptap integration** — initial `useEditor` setup with correct extension list, `onMouseDown` pattern for toolbar buttons to prevent editor blur.
 3. **Session management** — jose JWT setup with correct cookie flags (`httpOnly`, `sameSite`, `secure` in production).
 4. **Component structure** — Toast, Badge, DocList, ShareDialog initial drafts that matched the design spec.
-5. **Test cases** — access control matrix test cases; AI correctly identified the edge case of an owner who also has a share row.
+5. **Responsive design & sticky navigation**: Handled media queries and flexbox alignment across desktop side-by-side view and mobile drawer navigation.
+6. **Production auth & scalable sharing**: Transitioned from hardcoded demo user select to universal email login and auto-provisioning for any teammate email on share.
 
 ---
 
@@ -22,6 +23,7 @@
 2. **Share dialog confirm step**: AI's first draft showed a modal-within-modal for remove confirmation. I simplified it to inline "Remove Bob?" text in the same row — less UI chrome, clearer intent.
 3. **Error handling**: AI used generic catch blocks. I replaced with the typed `ApiError` class and a single `apiError()` helper to ensure every route returns the same shape.
 4. **Autosave retry**: AI's first draft used exponential backoff with `Math.pow()`. I replaced with fixed delays `[1000, 3000, 8000]` matching the spec exactly.
+5. **Button whitespace & height normalization**: Standardized all workspace action buttons to exact height (`h-9`), padding, and strict `whitespace-nowrap` to prevent multiline wrapping.
 
 ---
 
