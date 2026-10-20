@@ -11,6 +11,7 @@ create table if not exists documents (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references users(id) on delete cascade,
   title text not null default 'Untitled document',
+  excerpt text not null default '',
   content jsonb not null default '{"type":"doc","content":[{"type":"paragraph"}]}',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

@@ -23,6 +23,7 @@ export interface DocumentRow {
   id: string;
   owner_id: string;
   title: string;
+  excerpt: string;
   content: Record<string, unknown>;
   created_at: string;
   updated_at: string;

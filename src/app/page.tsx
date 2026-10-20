@@ -51,14 +51,16 @@ export default function DashboardPage() {
       if (meData) setUser(meData);
 
       setOwned(
-        docsData.owned.map((d: { id: string; title: string; updated_at: string }) => ({
+        docsData.owned.map((d: { id: string; title: string; excerpt?: string; updated_at: string }) => ({
           ...d,
+          description: d.excerpt,
           role: 'owner' as const,
         }))
       );
       setShared(
-        docsData.shared.map((d: { id: string; title: string; updated_at: string; owner_name: string; role: string }) => ({
+        docsData.shared.map((d: { id: string; title: string; excerpt?: string; updated_at: string; owner_name: string; role: string }) => ({
           ...d,
+          description: d.excerpt,
           role: d.role as 'editor' | 'viewer',
         }))
       );

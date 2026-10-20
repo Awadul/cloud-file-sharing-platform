@@ -15,7 +15,7 @@ export async function GET() {
   // Owned documents (exclude content for list performance)
   const { data: owned, error: ownedError } = await db
     .from('documents')
-    .select('id, title, updated_at, owner_id')
+    .select('id, title, excerpt, updated_at, owner_id')
     .eq('owner_id', session.userId)
     .order('updated_at', { ascending: false });
 
@@ -24,7 +24,7 @@ export async function GET() {
   // Shared documents
   const { data: shareRows, error: shareError } = await db
     .from('shares')
-    .select('document_id, role, documents(id, title, updated_at, owner_id, users!owner_id(name, email))')
+    .select('document_id, role, documents(id, title, excerpt, updated_at, owner_id, users!owner_id(name, email))')
     .eq('user_id', session.userId);
 
   if (shareError) return apiError('INTERNAL', 'Failed to fetch shared documents');
@@ -35,6 +35,7 @@ export async function GET() {
     documents: {
       id: string;
       title: string;
+      excerpt: string;
       updated_at: string;
       owner_id: string;
       users: { name: string; email: string } | null;
@@ -46,6 +47,7 @@ export async function GET() {
     .map((s) => ({
       id:         s.documents!.id,
       title:      s.documents!.title,
+      excerpt:    s.documents!.excerpt,
       updated_at: s.documents!.updated_at,
       owner_id:   s.documents!.owner_id,
       owner_name: s.documents!.users?.name ?? 'Unknown',

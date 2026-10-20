@@ -88,3 +88,22 @@ Running engineering and decision log kept across implementation slices. Serves a
   - `docs/architecture.md`: In-depth system design, authorization pattern, architectural tradeoffs, security checklist, performance decisions.
   - `docs/ai_workflow.md`: AI tooling review, human vs. model division of labor, verification patterns.
   - `docs/ai_log.md`: Chronological slice progress log.
+
+---
+
+## Slice 0: Setup, Schema Migration & Rich Seed Alignment
+- **Goal**: Apply schema amendments (`excerpt` column), populate realistic seed data per prompt Section 5, and install `lucide-react`.
+- **Actions**:
+  - Installed `lucide-react` for UI icons.
+  - Updated `supabase/schema.sql` to include `excerpt text not null default ''` on `documents`.
+  - Updated `supabase/seed.sql` with rich, realistic Tiptap JSON content, computed excerpts, and staggered timestamps for Alice (3 owned, 1 shared with Bob) and Bob (3 owned and shared with Alice: 1 editor, 2 viewer), keeping Carol unshared as stranger.
+  - Applied schema migration and seed to remote Supabase database via `npx supabase db query --linked`.
+  - Updated `DocumentRow` in `src/lib/db.ts` and `GET /api/documents` in `src/app/api/documents/route.ts` to return `excerpt`.
+- **Corrections & Adjustments**:
+  - Previously, `excerpt` was not part of the database schema; added `alter table documents add column if not exists excerpt text not null default ''` directly to the live remote database to ensure persistence without data loss.
+- **Verification**:
+  - Queried remote database to verify all 6 documents with their computed excerpts and timestamps.
+  - `npm test`: 34/34 passed.
+  - `npx tsc --noEmit`: 0 errors.
+  - `npm run lint`: 0 errors.
+
