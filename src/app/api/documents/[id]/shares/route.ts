@@ -60,17 +60,31 @@ export async function POST(req: NextRequest, { params }: Params) {
   const body = await req.json().catch(() => null);
   const parsed = ShareSchema.safeParse(body);
   if (!parsed.success) return apiError('VALIDATION', parsed.error.issues[0]?.message ?? 'Invalid input');
-
   const { email, role: shareRole } = parsed.data;
+  const normalizedEmail = email.toLowerCase().trim();
 
-  // Find target user
-  const { data: targetUser, error: userError } = await db
+  // Find target user or provision user so sharing scales to any teammate
+  let { data: targetUser } = await db
     .from('users')
     .select('id, email')
-    .eq('email', email)
+    .eq('email', normalizedEmail)
     .single();
 
-  if (userError || !targetUser) return apiError('USER_NOT_FOUND', `No user with email "${email}"`);
+  if (!targetUser) {
+    const namePart = normalizedEmail.split('@')[0];
+    const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+    const { data: newUser } = await db
+      .from('users')
+      .insert({ email: normalizedEmail, name: formattedName })
+      .select('id, email')
+      .single();
+
+    if (newUser) {
+      targetUser = newUser;
+    } else {
+      return apiError('USER_NOT_FOUND', `No user with email "${email}"`);
+    }
+  }
 
   // Cannot share with yourself
   if (targetUser.id === session.userId) {

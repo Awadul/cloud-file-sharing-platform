@@ -271,8 +271,8 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
               <div className="text-xs font-semibold text-white leading-tight truncate">
                 {user?.name ?? 'Alice'}
               </div>
-              <div className="text-[10px] text-slate-400 leading-tight">
-                Demo workspace
+              <div className="text-[10px] text-slate-400 leading-tight truncate">
+                {user?.email ?? 'Workspace'}
               </div>
             </div>
           </div>
@@ -319,27 +319,26 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
             </span>
           </div>
 
-          <div className="flex items-center gap-3 sm:gap-4">
-            <span className="text-xs text-slate-400 font-normal hidden sm:inline">
-              Interactive demo
-            </span>
-            {activeTab === 'home' ? (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setActiveTab('documents')}
-              >
-                Open demo
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setActiveTab('home')}
-              >
-                Back to overview
-              </Button>
-            )}
+          <div className="flex items-center gap-3">
+            <Button
+              id="top-new-doc-btn"
+              variant="primary"
+              size="sm"
+              loading={creating}
+              onClick={handleCreateDoc}
+            >
+              <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              <span>New document</span>
+            </Button>
+
+            <button
+              onClick={handleLogout}
+              className="text-xs font-semibold text-slate-500 hover:text-red-600 transition-colors px-2 py-1.5 rounded-lg"
+            >
+              Log out
+            </button>
           </div>
         </header>
 
@@ -380,24 +379,23 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
 
                   <div className="flex items-center gap-3 mt-5 sm:mt-6">
                     <Button
+                      id="hero-new-doc-btn"
                       variant="primary"
                       size="md"
-                      onClick={() => setActiveTab('documents')}
+                      loading={creating}
+                      onClick={handleCreateDoc}
                     >
-                      Open demo
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                      <span>New document</span>
                     </Button>
 
-                    <a
-                      href="https://github.com"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center justify-center gap-2 border border-slate-200/90 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 font-semibold h-9 px-3.5 text-xs rounded-lg shadow-xs transition-colors shrink-0 whitespace-nowrap"
-                    >
-                      <svg className="w-3.5 h-3.5 text-slate-700 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                        <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                      </svg>
-                      <span>View source</span>
-                    </a>
+                    <UploadButton
+                      onSuccess={(id) => router.push(`/docs/${id}`)}
+                      hideHint
+                      size="md"
+                    />
                   </div>
                 </div>
 
@@ -574,7 +572,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
                   />
                 </div>
                 <span className="text-[11px] text-slate-400 shrink-0">
-                  Sample documents · saved locally
+                  {filteredOwned.length} document{filteredOwned.length === 1 ? '' : 's'}
                 </span>
               </div>
 
@@ -653,7 +651,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
                   />
                 </div>
                 <span className="text-[11px] text-slate-400 shrink-0">
-                  Sample documents · saved locally
+                  {filteredShared.length} shared document{filteredShared.length === 1 ? '' : 's'}
                 </span>
               </div>
 
@@ -715,7 +713,7 @@ export function DashboardContent({ initialTab = 'home' }: { initialTab?: TabType
 
             <div>
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">
-                Switch Demo User
+                Switch Account
               </label>
               <div className="space-y-1.5">
                 {[
