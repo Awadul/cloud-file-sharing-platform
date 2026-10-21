@@ -74,7 +74,7 @@ npm run lint
 npm run build
 ```
 
-The current suite contains **71 tests across seven files**, covering document permissions, import parsing, authentication validation and route/session safeguards, editor outlines, landing drafts, and section selection. Authentication route tests use mocked Supabase responses; they do not verify email delivery or live Supabase configuration.
+The current suite contains **95 tests across eight files**, covering document permissions, import parsing, authentication validation and route/session safeguards, proxy route matching and cookie refresh, editor outlines, landing drafts, and section selection. Authentication route tests use mocked Supabase responses; they do not verify email delivery or live Supabase configuration.
 
 For a production server, build first and then run `npm start`.
 
