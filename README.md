@@ -30,7 +30,7 @@ The optional SQL seed creates sample database profiles and documents, **not Supa
 
 ### 1. Install dependencies
 
-Use Node.js 20.9 or newer and run these commands from the project directory:
+Use Node.js 22.12 or newer and run these commands from the project directory:
 
 ```sh
 npm install
@@ -74,7 +74,7 @@ npm run lint
 npm run build
 ```
 
-The current suite contains **95 tests across eight files**, covering document permissions, import parsing, authentication validation and route/session safeguards, proxy route matching and cookie refresh, editor outlines, landing drafts, and section selection. Authentication route tests use mocked Supabase responses; they do not verify email delivery or live Supabase configuration.
+The current suite contains **128 tests across eleven files**, covering document permissions, import parsing, authentication validation and route/session safeguards, proxy route matching and cookie refresh, editor outlines, landing drafts, section selection, transactional product-tier database invariants, content export, clarity checks, and monitoring redaction. Authentication route tests use mocked Supabase responses; they do not verify email delivery or live Supabase configuration.
 
 For a production server, build first and then run `npm start`.
 
@@ -99,11 +99,21 @@ For a production server, build first and then run `npm start`.
 - Zod request validation; `mammoth`, `marked`, and `sanitize-html` for imports.
 - Vitest and ESLint for automated checks.
 
+## Product tiers
+
+Source implementation now includes password recovery, account export/deletion, Privacy and Terms pages, safe revision saves, version restoration, Trash, verified invitations, queued sharing/review emails, review inbox and approvals, richer editor controls, private image uploads, Markdown/Word/PDF export paths, and optional Clarity suggestions.
+
+Database-dependent features are gated by `PLAINPAGE_PRODUCT_TIERS=true`. Apply `supabase/migrations/20261021_product_tiers.sql` first; do not enable the flag on an unmigrated database. The migration was applied to the linked Supabase project on 2026-10-21, verified against the live database, and enabled for the local application. See [activation record](docs/activation-2026-10-21.md). External email, monitoring, AI and backup scheduling still require configuration.
+
+See [activation and operations](docs/operations.md) for deployment order, credentials, notification worker scheduling, restore checks, privacy settings and current export limits. Password reset requires the correct Auth callback allowlist. Supabase account emails and the separate sharing/review email worker use different configurations.
+
 ## Current limits and deployment checks
 
-- **Concurrent editing:** saves use last-write-wins behavior. Live multi-cursor editing and merge conflict resolution are not implemented.
+- **Concurrent editing:** when product tiers are enabled, saves require a matching revision and preserve local drafts after a conflict. Before activation, the original save behavior remains. Live cursor collaboration and automatic merging are not implemented.
 - **Database access:** server routes enforce application-level permissions. The supplied schema does not define RLS policies; review database grants and policies separately before deployment. Server service-role operations bypass RLS.
 - **Customer reviews:** the landing page collects review text into a local download. It does not submit, store, or publish testimonials.
 - **Live validation:** local tests and builds do not establish production availability, successful live login, or confirmation-email delivery. Verify these against your configured Supabase project and deployed origin.
 
 No production URL is asserted by this README; use the URL of your verified deployment.
+
+The test runner uses Rollup's supported WebAssembly package because Windows Application Control blocked its native dependency on the development machine. Production dependency audit currently reports three moderate findings in the existing Word-import dependency chain; no high or critical production findings were reported.

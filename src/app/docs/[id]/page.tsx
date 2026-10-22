@@ -1,5 +1,12 @@
 "use client";
-import React, { useEffect, useState, useCallback, use, Suspense } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  use,
+  Suspense,
+  useRef,
+} from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -7,6 +14,7 @@ import { ArrowLeft, Check, Users } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { ShareDialog } from "@/components/ShareDialog";
+import { DocumentTools } from "@/components/DocumentTools";
 import { Toast, useToast } from "@/components/Toast";
 const Editor = dynamic(
   () => import("@/components/Editor").then((m) => m.Editor),
@@ -26,9 +34,13 @@ interface Doc {
   content: Record<string, unknown>;
   owner_id: string;
   updated_at: string;
+  productTiers?: boolean;
+  aiConfigured?: boolean;
+  revision?: number;
+  review_status?: string;
   role: "owner" | "editor" | "viewer";
 }
-type SaveStatus = "idle" | "saving" | "saved" | "error";
+type SaveStatus = "idle" | "saving" | "saved" | "error" | "conflict";
 function EditorPageContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -40,6 +52,39 @@ function EditorPageContent({ params }: { params: Promise<{ id: string }> }) {
     [sharing, setSharing] = useState(false),
     [status, setStatus] = useState<SaveStatus>("idle"),
     [titleSaving, setTitleSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const activeDocument = useRef(id);
+  useEffect(() => {
+    activeDocument.current = id;
+    return () => {
+      activeDocument.current = "";
+    };
+  }, [id]);
+  const revisionRef = useRef<number | undefined>(undefined);
+  const queueRef = useRef<Promise<unknown>>(Promise.resolve());
+  const savePatch = useCallback(
+    (patch: Record<string, unknown>): Promise<void> => {
+      const task = queueRef.current
+        .catch(() => undefined)
+        .then(async () => {
+          const response = await fetch(`/api/documents/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            signal: AbortSignal.timeout(20000),
+            body: JSON.stringify({ ...patch, revision: revisionRef.current }),
+          });
+          if (response.status === 409) throw new Error("CONFLICT");
+          if (!response.ok) throw new Error("SAVE_FAILED");
+          const saved = await response.json();
+          if (activeDocument.current !== id) return;
+          revisionRef.current = saved.revision;
+          setDoc((current) => (current ? { ...current, ...saved } : current));
+        });
+      queueRef.current = task;
+      return task;
+    },
+    [id],
+  );
   const { toasts, toast, dismiss } = useToast();
   const load = useCallback(async () => {
     setLoading(true);
@@ -60,6 +105,7 @@ function EditorPageContent({ params }: { params: Promise<{ id: string }> }) {
       if (!dr.ok)
         throw new Error("Could not load this document. Please try again.");
       const d = await dr.json();
+      revisionRef.current = d.revision;
       setDoc(d);
       setTitle(d.title);
       if (mr.ok) {
@@ -83,12 +129,7 @@ function EditorPageContent({ params }: { params: Promise<{ id: string }> }) {
     setTitle(next);
     setTitleSaving(true);
     try {
-      const r = await fetch(`/api/documents/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: next }),
-      });
-      if (!r.ok) throw new Error();
+      await savePatch({ title: next });
       setDoc((d) => (d ? { ...d, title: next } : d));
     } catch {
       toast("The document title could not be saved. Try again.", "error", true);
@@ -118,7 +159,19 @@ function EditorPageContent({ params }: { params: Promise<{ id: string }> }) {
   return (
     <div className="pp-editor">
       <header className="pp-editor-header">
-        <Link href="/" className="pp-editor-back">
+        <Link
+          href="/"
+          className="pp-editor-back"
+          onClick={(event) => {
+            if (
+              (dirty || titleSaving || (doc && title !== doc.title)) &&
+              !window.confirm(
+                "You have unsaved changes. Stay here to save or download your draft. Leave anyway?",
+              )
+            )
+              event.preventDefault();
+          }}
+        >
           <ArrowLeft size={18} />
           Docs
         </Link>
@@ -147,8 +200,12 @@ function EditorPageContent({ params }: { params: Promise<{ id: string }> }) {
         >
           {status === "saving" || titleSaving ? (
             "Saving…"
+          ) : status === "conflict" ? (
+            "Review changes"
           ) : status === "error" ? (
             "Save failed"
+          ) : dirty ? (
+            "Unsaved changes"
           ) : !loading ? (
             <>
               <Check size={15} />
@@ -168,9 +225,39 @@ function EditorPageContent({ params }: { params: Promise<{ id: string }> }) {
           )}
         </div>
       </header>
+      {doc?.productTiers && doc.revision !== undefined && (
+        <DocumentTools
+          docId={id}
+          revision={doc.revision}
+          role={doc.role}
+          title={doc.title}
+          hasLocalEdits={dirty || titleSaving || title !== doc.title}
+          onReload={() => {
+            if (
+              dirty ||
+              titleSaving ||
+              status === "saving" ||
+              status === "error" ||
+              status === "conflict"
+            ) {
+              toast(
+                "Save or download your local changes before reloading.",
+                "error",
+              );
+              return;
+            }
+            void load();
+          }}
+        />
+      )}
       <main className="pp-editor-main">
         {doc && !loading && (
           <Editor
+            key={loading ? "loading" : id}
+            aiConfigured={doc.aiConfigured}
+            productTiers={doc.productTiers}
+            onDirtyChange={setDirty}
+            onSave={savePatch}
             docId={doc.id}
             initialContent={doc.content}
             initialTitle={doc.title}

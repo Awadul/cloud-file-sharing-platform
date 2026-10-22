@@ -3,14 +3,26 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { TableKit } from "@tiptap/extension-table";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
+import Image from "@tiptap/extension-image";
+import { analyzeClarity } from "@/lib/clarity";
 import Underline from "@tiptap/extension-underline";
 import { Toolbar } from "./Toolbar";
-import { activeOutlinePosition, type OutlineHeading } from "@/lib/editor-outline";
+import {
+  activeOutlinePosition,
+  type OutlineHeading,
+} from "@/lib/editor-outline";
 
-type SaveStatus = "idle" | "saving" | "saved" | "error";
+type SaveStatus = "idle" | "saving" | "saved" | "error" | "conflict";
 
 interface EditorProps {
+  productTiers?: boolean;
+  aiConfigured?: boolean;
   docId: string;
+  onDirtyChange?: (dirty: boolean) => void;
+  onSave?: (patch: Record<string, unknown>) => Promise<void>;
   initialContent: Record<string, unknown>;
   initialTitle?: string;
   role: "owner" | "editor" | "viewer";
@@ -19,7 +31,14 @@ interface EditorProps {
   onSaveStatusChange?: (status: SaveStatus) => void;
 }
 
-const EXTENSIONS = [StarterKit.configure({ underline: false }), Underline];
+const EXTENSIONS = [
+  StarterKit.configure({ underline: false }),
+  Underline,
+  TableKit,
+  TaskList,
+  TaskItem.configure({ nested: true }),
+  Image.configure({ allowBase64: false }),
+];
 
 function contentFromImport(
   raw: Record<string, unknown>,
@@ -39,6 +58,10 @@ function contentFromImport(
 
 export function Editor({
   docId,
+  productTiers,
+  aiConfigured,
+  onSave,
+  onDirtyChange,
   initialContent,
   role,
   onSaveStatusChange,
@@ -48,7 +71,19 @@ export function Editor({
   const [activeHeading, setActiveHeading] = useState<number | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const retryCount = useRef(0);
+  const mounted = useRef(true);
+  const conflictRef = useRef(false);
+  const editSequence = useRef(0);
+  const [clarity, setClarity] = useState(false);
+  const [suggestion, setSuggestion] = useState("");
+  const [aiMessage, setAiMessage] = useState("");
+  const [aiBusy, setAiBusy] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const suggestionText = useRef("");
+  const suggestionRange = useRef({ from: 0, to: 0 });
+  const [suggestionMode, setSuggestionMode] = useState<"summary" | "rewrite">(
+    "summary",
+  );
   const hasUnsaved = useRef(false);
 
   const updateSaveStatus = useCallback(
@@ -60,31 +95,33 @@ export function Editor({
   );
 
   async function saveContent(content: Record<string, unknown>) {
+    if (conflictRef.current) return;
+    const sequence = editSequence.current;
     updateSaveStatus("saving");
-    const delays = [1000, 3000, 8000];
-    for (let attempt = 0; attempt <= 2; attempt++) {
-      try {
-        const res = await fetch(`/api/documents/${docId}`, {
+    try {
+      if (onSave) await onSave({ content });
+      else {
+        const response = await fetch(`/api/documents/${docId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content }),
         });
-        if (res.ok) {
-          updateSaveStatus("saved");
-          hasUnsaved.current = false;
-          retryCount.current = 0;
-          return;
-        }
-      } catch {
-        /* network error, retry */
+        if (response.status === 409) throw new Error("CONFLICT");
+        if (!response.ok) throw new Error("SAVE_FAILED");
       }
-      if (attempt < 2) {
-        updateSaveStatus("error");
-        await new Promise((r) => setTimeout(r, delays[attempt]));
-        updateSaveStatus("saving");
+      if (!mounted.current) return;
+      if (sequence === editSequence.current) {
+        hasUnsaved.current = false;
+        onDirtyChange?.(false);
+        updateSaveStatus("saved");
       }
+    } catch (error) {
+      if (!mounted.current) return;
+      if (error instanceof Error && error.message === "CONFLICT") {
+        conflictRef.current = true;
+        updateSaveStatus("conflict");
+      } else updateSaveStatus("error");
     }
-    updateSaveStatus("error");
   }
 
   const editor = useEditor({
@@ -110,6 +147,8 @@ export function Editor({
     onUpdate: ({ editor }) => {
       if (isReadOnly) return;
 
+      onDirtyChange?.(true);
+      editSequence.current++;
       hasUnsaved.current = true;
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => {
@@ -122,7 +161,9 @@ export function Editor({
     if (!editor) return;
     let currentHeadings: OutlineHeading[] = [];
     const updateActiveHeading = () => {
-      setActiveHeading(activeOutlinePosition(currentHeadings, editor.state.selection.from));
+      setActiveHeading(
+        activeOutlinePosition(currentHeadings, editor.state.selection.from),
+      );
     };
     const updateOutline = () => {
       const items: OutlineHeading[] = [];
@@ -157,7 +198,9 @@ export function Editor({
 
   // Cleanup timer on unmount
   useEffect(() => {
+    mounted.current = true;
     return () => {
+      mounted.current = false;
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
   }, []);
@@ -165,11 +208,210 @@ export function Editor({
   return (
     <div>
       {!isReadOnly ? (
-        <Toolbar editor={editor} />
+        <Toolbar
+          editor={editor}
+          docId={productTiers ? docId : undefined}
+          onClarity={() => setClarity(!clarity)}
+        />
       ) : (
         <div className="pp-view-only">
           View only — you can select and copy text.
         </div>
+      )}
+      {(saveStatus === "conflict" || saveStatus === "error") && (
+        <div className="pp-save-error" role="alert">
+          <strong>
+            {saveStatus === "conflict"
+              ? "Someone changed this document. Your local edits are still here."
+              : "Your changes are not saved. Keep this page open."}
+          </strong>
+          <p>Download your draft before opening the latest saved version.</p>
+          <button
+            className="btn btn-sm"
+            type="button"
+            onClick={() => {
+              const blob = new Blob(
+                [JSON.stringify(editor?.getJSON(), null, 2)],
+                { type: "application/json" },
+              );
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "plainpage-unsaved-draft.json";
+              a.click();
+              setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }}
+          >
+            Download my draft
+          </button>
+          {saveStatus === "error" && (
+            <button
+              className="btn btn-sm"
+              type="button"
+              onClick={() => {
+                if (editor)
+                  void saveContent(editor.getJSON() as Record<string, unknown>);
+              }}
+            >
+              Retry save
+            </button>
+          )}
+          <a
+            className="btn btn-sm"
+            href={`/docs/${docId}`}
+            target="_blank"
+            rel="noopener"
+          >
+            Open latest in another tab
+          </a>
+        </div>
+      )}
+      {clarity && editor && (
+        <aside className="pp-product-panel" aria-label="Clarity">
+          <h2>Clarity</h2>
+          <p>
+            Local checks update as you type. These are suggestions, not a
+            quality score.
+          </p>
+          {(() => {
+            const report = analyzeClarity(editor.getText());
+            return (
+              <p>
+                {report.words} words · {report.longSentences.length} long
+                sentences · {report.jargon.length} jargon terms
+                {report.jargon.length ? `: ${report.jargon.join(", ")}` : ""}
+              </p>
+            );
+          })()}
+          <label>
+            <input
+              className="checkbox checkbox-sm"
+              type="checkbox"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+            />{" "}
+            Allow this document text to be sent to OpenAI for this suggestion.
+          </label>
+          <p>
+            {aiConfigured
+              ? "AI actions count toward 20 attempts per day, including failed attempts."
+              : "AI suggestions are not available yet. Local clarity checks work without them."}
+          </p>
+          {(["summary", "rewrite"] as const).map((action) => (
+            <button
+              className="btn btn-sm"
+              key={action}
+              disabled={!aiConfigured || !consent || aiBusy || isReadOnly}
+              onClick={async () => {
+                setAiBusy(true);
+                setAiMessage("");
+                const text =
+                  action === "rewrite"
+                    ? editor.state.doc.textBetween(
+                        editor.state.selection.from,
+                        editor.state.selection.to,
+                        " ",
+                      )
+                    : editor.getText();
+                suggestionText.current = JSON.stringify(editor.getJSON());
+                suggestionRange.current = {
+                  from: editor.state.selection.from,
+                  to: editor.state.selection.to,
+                };
+                setSuggestionMode(action);
+                if (!text.trim()) {
+                  setAiMessage("Select a passage to rewrite first.");
+                  setAiBusy(false);
+                  return;
+                }
+                try {
+                  const r = await fetch(`/api/documents/${docId}/clarity`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action, text, consent: true }),
+                  });
+                  const d = await r.json();
+                  if (!r.ok) throw new Error(d.error?.message);
+                  setSuggestion(d.suggestion);
+                  setAiMessage(
+                    `${d.remaining} attempts left today. ${action === "rewrite" ? "Review the suggestion before accepting the rewrite." : "Review before inserting at the top."}`,
+                  );
+                } catch (e) {
+                  setAiMessage(
+                    e instanceof Error ? e.message : "Suggestion failed.",
+                  );
+                } finally {
+                  setAiBusy(false);
+                }
+              }}
+            >
+              {action === "summary"
+                ? "Suggest a summary"
+                : "Rewrite selected text"}
+            </button>
+          ))}
+          {suggestion && (
+            <div>
+              <h3>Suggested by AI</h3>
+              <p style={{ whiteSpace: "pre-wrap" }}>{suggestion}</p>
+              <button
+                className="btn btn-sm"
+                onClick={() => {
+                  if (
+                    JSON.stringify(editor.getJSON()) !== suggestionText.current
+                  ) {
+                    setAiMessage(
+                      "The document changed. Generate a fresh suggestion before inserting.",
+                    );
+                    return;
+                  }
+                  if (suggestionMode === "rewrite")
+                    editor
+                      .chain()
+                      .focus()
+                      .insertContentAt(suggestionRange.current, {
+                        type: "text",
+                        text: suggestion,
+                      })
+                      .run();
+                  else
+                    editor
+                      .chain()
+                      .focus()
+                      .insertContentAt(0, {
+                        type: "paragraph",
+                        content: [{ type: "text", text: suggestion }],
+                      })
+                      .run();
+                  setSuggestion("");
+                }}
+              >
+                {suggestionMode === "rewrite"
+                  ? "Accept rewrite"
+                  : "Insert at top"}
+              </button>
+              <button
+                className="btn btn-sm"
+                onClick={() =>
+                  void navigator.clipboard
+                    .writeText(suggestion)
+                    .catch(() =>
+                      setAiMessage("Select and copy the suggestion manually."),
+                    )
+                }
+              >
+                Copy
+              </button>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => setSuggestion("")}
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+          <p role="status">{aiMessage}</p>
+        </aside>
       )}
       <div className="pp-editor-layout">
         <aside className="pp-editor-outline" aria-label="Document outline">
@@ -179,7 +421,9 @@ export function Editor({
               <button
                 type="button"
                 key={`${heading.pos}-${index}`}
-                aria-current={activeHeading === heading.pos ? "location" : undefined}
+                aria-current={
+                  activeHeading === heading.pos ? "location" : undefined
+                }
                 onClick={() => {
                   setActiveHeading(heading.pos);
                   editor
@@ -204,12 +448,6 @@ export function Editor({
           <EditorContent editor={editor} />
         </div>
       </div>
-      {saveStatus === "error" && (
-        <div className="pp-save-error" role="alert">
-          Save failed. Retrying automatically. Keep this page open until your
-          changes are saved.
-        </div>
-      )}
     </div>
   );
 }

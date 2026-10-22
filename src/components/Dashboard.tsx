@@ -27,6 +27,7 @@ import { KebabMenu } from "@/components/KebabMenu";
 import { Toast, useToast } from "@/components/Toast";
 export type TabType = "home" | "documents" | "shared";
 interface Person {
+  productTiers?: boolean;
   userId: string;
   name: string;
   email: string;
@@ -83,7 +84,10 @@ export function DashboardContent({
     try {
       setError("");
       const [dr, mr] = await Promise.all([
-        fetch("/api/documents"),
+        (async () => {
+          await fetch("/api/invitations/accept", { method: "POST" });
+          return fetch("/api/documents");
+        })(),
         fetch("/api/me"),
       ]);
       if (dr.status === 401 || mr.status === 401) {
@@ -179,7 +183,7 @@ export function DashboardContent({
         const save = await fetch(`/api/documents/${doc.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content }),
+          body: JSON.stringify({ content, revision: doc.revision }),
         });
         if (!save.ok)
           toast(
@@ -282,10 +286,17 @@ export function DashboardContent({
             <div className="pp-doc-card-body">
               <div className="pp-doc-card-title">
                 <Link href={`/docs/${d.id}`} className="pp-doc-open">
-                  <span className="pp-doc-name">{d.title || "Untitled document"}</span>
-                  <span className={`pp-doc-excerpt ${d.excerpt?.trim() ? "" : "pp-doc-excerpt-empty"}`}>{d.excerpt?.trim() || "No text yet."}</span>
+                  <span className="pp-doc-name">
+                    {d.title || "Untitled document"}
+                  </span>
+                  <span
+                    className={`pp-doc-excerpt ${d.excerpt?.trim() ? "" : "pp-doc-excerpt-empty"}`}
+                  >
+                    {d.excerpt?.trim() || "No text yet."}
+                  </span>
                 </Link>
                 <KebabMenu
+                  softDelete={!!user?.productTiers}
                   docId={d.id}
                   docTitle={d.title}
                   role={d.role}
@@ -353,6 +364,13 @@ export function DashboardContent({
                 </Link>
               );
             })}
+            {user?.productTiers && (
+              <>
+                <Link href="/reviews">Reviews</Link>
+                <Link href="/trash">Trash</Link>
+              </>
+            )}
+            <Link href="/account">Account and data</Link>
           </nav>
         </div>
         <div className="pp-sidebar-bottom">
@@ -456,7 +474,12 @@ export function DashboardContent({
                     onClick={() => createDocument(s)}
                   >
                     <span className="pp-starter-page">
-                      <FileText size={24} strokeWidth={1.6} className="pp-document-symbol" aria-hidden="true"/>
+                      <FileText
+                        size={24}
+                        strokeWidth={1.6}
+                        className="pp-document-symbol"
+                        aria-hidden="true"
+                      />
                     </span>
                     <strong>{s.name}</strong>
                     <span>Starter</span>
@@ -680,6 +703,9 @@ export function DashboardContent({
             <span className="pp-avatar">{user?.name[0]}</span>
             <h3>{user?.name}</h3>
             <p>{user?.email}</p>
+            <Link className="btn btn-ghost" href="/account">
+              Account, export and deletion
+            </Link>
             <div className="pp-account-actions">
               <Button variant="secondary" onClick={logout}>
                 <LogOut size={16} />

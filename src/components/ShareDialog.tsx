@@ -27,6 +27,9 @@ export function ShareDialog({
   isOpen,
   onClose,
 }: ShareDialogProps) {
+  const [invitations, setInvitations] = useState<
+    { id: string; email: string; role: string; accepted_by: string | null }[]
+  >([]);
   const [shares, setShares] = useState<ShareUser[]>([]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"editor" | "viewer">("viewer");
@@ -49,6 +52,7 @@ export function ShareDialog({
     if (res.ok) {
       const data = await res.json();
       setShares(data.shares);
+      if (data.invitations) setInvitations(data.invitations);
     }
   }, [docId]);
 
@@ -108,7 +112,13 @@ export function ShareDialog({
     const data = await res.json();
     setShares(data.shares);
     setEmail("");
-    toast(`Shared with ${email}`, "success");
+    if (data.invitation) void fetchShares();
+    toast(
+      data.invitation
+        ? `Invitation saved for ${email}. Email is queued.`
+        : `Shared with ${email}`,
+      "success",
+    );
   }
 
   async function handleRoleChange(
@@ -198,6 +208,33 @@ export function ShareDialog({
         <p className="pp-share-helper">
           Add a person by email. Choose editor or viewer access.
         </p>
+        {invitations.some((i) => !i.accepted_by) && (
+          <section className="pp-share-people">
+            <h3>Pending invitations</h3>
+            {invitations
+              .filter((i) => !i.accepted_by)
+              .map((invite) => (
+                <div className="pp-access-row" key={invite.id}>
+                  <div>
+                    <strong>{invite.email}</strong>
+                    <small>{invite.role} · awaiting verified sign-in</small>
+                  </div>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={async () => {
+                      const r = await fetch(`/api/invitations/${invite.id}`, {
+                        method: "DELETE",
+                      });
+                      if (r.ok) void fetchShares();
+                      else toast("Invitation could not be revoked.", "error");
+                    }}
+                  >
+                    Revoke
+                  </button>
+                </div>
+              ))}
+          </section>
+        )}
         <section className="pp-share-people">
           <h3>People with access</h3>
           <div className="pp-access-row">

@@ -2,7 +2,15 @@
 import React from "react";
 import type { Editor } from "@tiptap/react";
 import { Bold, Italic, Underline, List, ListOrdered } from "lucide-react";
-export function Toolbar({ editor }: { editor: Editor | null }) {
+export function Toolbar({
+  editor,
+  docId,
+  onClarity,
+}: {
+  editor: Editor | null;
+  docId?: string;
+  onClarity?: () => void;
+}) {
   if (!editor) return null;
   const controls = [
     {
@@ -75,6 +83,120 @@ export function Toolbar({ editor }: { editor: Editor | null }) {
       >
         <ListOrdered size={20} />
       </button>
+      {docId && (
+        <>
+          <button
+            type="button"
+            aria-label="Insert or edit link"
+            onClick={() => {
+              const href = window.prompt(
+                "Link URL (https:// or http://). Leave empty to remove.",
+                String(editor.getAttributes("link").href ?? ""),
+              );
+              if (href === null) return;
+              if (!href) {
+                editor.chain().focus().unsetLink().run();
+                return;
+              }
+              if (!/^https?:\/\//i.test(href)) {
+                window.alert("Use an https:// or http:// link.");
+                return;
+              }
+              editor
+                .chain()
+                .focus()
+                .extendMarkRange("link")
+                .setLink({ href })
+                .run();
+            }}
+          >
+            Link
+          </button>
+          <button
+            type="button"
+            aria-pressed={editor.isActive("codeBlock")}
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          >
+            Code
+          </button>
+          <button
+            type="button"
+            aria-pressed={editor.isActive("taskList")}
+            onClick={() => editor.chain().focus().toggleTaskList().run()}
+          >
+            Tasks
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              editor
+                .chain()
+                .focus()
+                .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+                .run()
+            }
+          >
+            Table
+          </button>
+          {editor.isActive("table") && (
+            <>
+              <button
+                type="button"
+                onClick={() => editor.chain().focus().addRowAfter().run()}
+              >
+                Add row
+              </button>
+              <button
+                type="button"
+                onClick={() => editor.chain().focus().addColumnAfter().run()}
+              >
+                Add column
+              </button>
+              <button
+                type="button"
+                onClick={() => editor.chain().focus().deleteTable().run()}
+              >
+                Remove table
+              </button>
+            </>
+          )}
+          <label className="btn btn-ghost pp-image-upload">
+            Image
+            <input
+              type="file"
+              className="sr-only"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const form = new FormData();
+                form.append("file", file);
+                try {
+                  const r = await fetch(`/api/documents/${docId}/images`, {
+                    method: "POST",
+                    body: form,
+                  });
+                  const d = await r.json();
+                  if (!r.ok) throw new Error(d.error?.message);
+                  editor
+                    .chain()
+                    .focus()
+                    .setImage({ src: d.src, alt: file.name })
+                    .run();
+                } catch (error) {
+                  window.alert(
+                    error instanceof Error ? error.message : "Upload failed.",
+                  );
+                }
+                e.target.value = "";
+              }}
+            />
+          </label>
+          <button type="button" onClick={onClarity}>
+            Clarity
+          </button>
+        </>
+      )}
     </div>
   );
 }
