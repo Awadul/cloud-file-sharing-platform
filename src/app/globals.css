@@ -5359,3 +5359,8 @@ body:has(.pp-document-tools) .pp-editor-main { padding-right:72px; }
 
 /* Shrink only the painted checkbox indicator; keep its label hit area. */
 .pp-editor-paper .tiptap-content ul[data-type="taskList"]>li>label input[type="checkbox"] { transform:scale(.75); transform-origin:center; }
+
+/* Center the desktop copy vertically alongside the product preview. */
+@media(min-width:1001px) {
+ .pp-docs-hero .pp-landing-intro { align-self:center; padding:0; translate:0 -8px; }
+}
