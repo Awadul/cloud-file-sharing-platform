@@ -4,11 +4,13 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { TableKit } from "@tiptap/extension-table";
-import TaskList from "@tiptap/extension-task-list";
+import { PlainpageTaskList } from "@/lib/checklists";
 import TaskItem from "@tiptap/extension-task-item";
 import Image from "@tiptap/extension-image";
 import { analyzeClarity } from "@/lib/clarity";
 import Underline from "@tiptap/extension-underline";
+import { FORMATTING_EXTENSIONS } from "@/lib/editor-formatting";
+import { SlashCommands } from "./SlashCommands";
 import { Toolbar } from "./Toolbar";
 import {
   activeOutlinePosition,
@@ -32,10 +34,11 @@ interface EditorProps {
 }
 
 const EXTENSIONS = [
+  ...FORMATTING_EXTENSIONS,
   StarterKit.configure({ underline: false }),
   Underline,
   TableKit,
-  TaskList,
+  PlainpageTaskList,
   TaskItem.configure({ nested: true }),
   Image.configure({ allowBase64: false }),
 ];
@@ -85,6 +88,7 @@ export function Editor({
     "summary",
   );
   const hasUnsaved = useRef(false);
+  const [draftDirty, setDraftDirty] = useState(false);
 
   const updateSaveStatus = useCallback(
     (s: SaveStatus) => {
@@ -112,6 +116,7 @@ export function Editor({
       if (!mounted.current) return;
       if (sequence === editSequence.current) {
         hasUnsaved.current = false;
+        setDraftDirty(false);
         onDirtyChange?.(false);
         updateSaveStatus("saved");
       }
@@ -150,6 +155,7 @@ export function Editor({
       onDirtyChange?.(true);
       editSequence.current++;
       hasUnsaved.current = true;
+      setDraftDirty(true);
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => {
         saveContent(editor.getJSON() as Record<string, unknown>);
@@ -212,6 +218,7 @@ export function Editor({
           editor={editor}
           docId={productTiers ? docId : undefined}
           onClarity={() => setClarity(!clarity)}
+          clarityOpen={clarity}
         />
       ) : (
         <div className="pp-view-only">
@@ -413,6 +420,7 @@ export function Editor({
           <p role="status">{aiMessage}</p>
         </aside>
       )}
+      {!isReadOnly && productTiers && <SlashCommands editor={editor} />}
       <div className="pp-editor-layout">
         <aside className="pp-editor-outline" aria-label="Document outline">
           <h2>Outline</h2>
@@ -448,6 +456,11 @@ export function Editor({
           <EditorContent editor={editor} />
         </div>
       </div>
+      <footer className="pp-editor-document-status" aria-label="Document information">
+        <span>{editor?.getText().trim().split(/\s+/).filter(Boolean).length ?? 0} words</span>
+        <span>{isReadOnly ? "View only" : "Editing"}</span>
+        <span>{saveStatus === "saving" ? "Saving..." : saveStatus === "conflict" ? "Save conflict  -  local draft preserved" : saveStatus === "error" ? "Not saved  -  keep this page open" : draftDirty ? "Unsaved changes" : "All changes saved"}</span>
+      </footer>
     </div>
   );
 }

@@ -118,7 +118,7 @@
 @plugin "daisyui" {
   themes: light --default;
   logs: false;
-  include: button, input, select, badge, card, table, modal;
+  include: button, input, select, badge, card, table, modal, dropdown;
 }
 
 @plugin "daisyui/theme" {
@@ -4969,8 +4969,18 @@ body:has(.pp-document-tools) .pp-editor-main { padding-right:72px; }
 .tiptap-content table { border-collapse:collapse; table-layout:fixed; width:100%; margin:16px 0; }
 .tiptap-content td,.tiptap-content th { border:1px solid #ccd4e0; padding:8px; min-width:80px; vertical-align:top; }
 .tiptap-content th { background:#f3f5fa; font-weight:600; }
-.tiptap-content ul[data-type=taskList] { list-style:none; padding-left:0; }
-.tiptap-content li[data-type=taskItem] { display:flex; gap:8px; align-items:flex-start; }
+/* TaskItem node views do not always expose data-type on the live li. */
+.pp-editor-paper .tiptap-content ul[data-type="taskList"] { list-style:none; padding:0; margin:12px 0; }
+.pp-editor-paper .tiptap-content ul[data-type="taskList"]>li { display:flex; align-items:flex-start; gap:6px; margin:0; padding:0; min-height:40px; list-style:none; }
+.pp-editor-paper .tiptap-content ul[data-type="taskList"]>li>label { display:flex; align-items:center; justify-content:center; flex:0 0 20px; width:20px; min-height:40px; margin:0; padding:0; cursor:pointer; }
+.pp-editor-paper .tiptap-content ul[data-type="taskList"]>li>label input[type="checkbox"] { appearance:auto; width:12px; min-width:12px; max-width:12px; height:12px; min-height:12px; max-height:12px; flex-shrink:0; margin:0; padding:0; accent-color:var(--color-primary); cursor:pointer; }
+.pp-editor-paper .tiptap-content ul[data-type="taskList"]>li>div { flex:1; min-width:0; padding:8px 0; }
+.pp-editor-paper .tiptap-content ul[data-type="taskList"]>li>div>p { margin:0; line-height:24px; }
+.pp-editor-paper .tiptap-content ul[data-type="taskList"]>li>div>p+p { margin-top:8px; }
+.pp-editor-paper .tiptap-content ul[data-type="taskList"]>li>div>ul[data-type="taskList"] { margin:4px 0 0; }
+.pp-editor-paper .tiptap-content ul[data-type="taskList"]>li:has(>label input:checked)>div>p { color:var(--pp-muted); text-decoration:line-through; text-decoration-thickness:1px; text-decoration-color:color-mix(in srgb,var(--pp-muted) 55%,transparent); }
+.pp-editor-paper .tiptap-content[aria-readonly="true"] ul[data-type="taskList"]>li>label,
+.pp-editor-paper .tiptap-content[aria-readonly="true"] ul[data-type="taskList"] input { cursor:default; }
 .tiptap-content img { max-width:100%; height:auto; }
 .tiptap-content pre { background:#f3f5fa; padding:16px; border-radius:6px; overflow-x:auto; }
 .pp-save-error .btn { margin:8px 8px 0 0; }
@@ -4983,3 +4993,369 @@ body:has(.pp-document-tools) .pp-editor-main { padding-right:72px; }
 }
 
 .pp-review-banner { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-basis:100%; padding:12px 16px; background:#eef3ff; color:#243c72; border-radius:6px; font-size:14px; }
+/* Compact document workbench — PDF reference pages 6–8. */
+.pp-editor-toolbar.pp-editor-workbench { position:sticky; top:64px; z-index:26; display:flex; align-items:center; flex-wrap:wrap; overflow:visible; gap:2px; height:auto; min-height:48px; padding:4px 16px; background:var(--color-base-200); border-bottom:1px solid var(--pp-line); }
+.pp-editor-workbench>button,.pp-editor-workbench summary.btn { flex:0 0 auto; width:auto; height:40px; min-height:40px; min-width:40px; padding:8px 10px; font-size:12px; border:0; border-radius:4px; background:transparent; box-shadow:none; }
+.pp-editor-workbench>button:disabled { opacity:.35; cursor:default; }
+.pp-editor-workbench>button:hover:not(:disabled),.pp-editor-workbench summary:hover { background:var(--color-base-300); }
+.pp-editor-workbench .pp-toolbar-divider { height:20px; margin:0 6px; align-self:center; }
+.pp-editor-workbench summary { display:flex; align-items:center; gap:8px; list-style:none; cursor:pointer; }
+.pp-editor-workbench summary::-webkit-details-marker { display:none; }
+.pp-editor-workbench>.dropdown { position:relative; flex:0 0 auto; height:40px; }
+.pp-format-dropdown>summary { width:128px; min-width:128px!important; justify-content:space-between; }
+.pp-editor-workbench .pp-format-menu { position:absolute; top:calc(100% + 4px); left:0; display:flex; flex-direction:column; gap:2px; width:208px; padding:6px; border:1px solid var(--pp-line); border-radius:8px; background:var(--color-base-100); color:var(--pp-ink); box-shadow:0 8px 24px color-mix(in srgb,var(--pp-ink) 12%,transparent); z-index:40; }
+.pp-editor-workbench .pp-format-menu button,.pp-editor-workbench .pp-format-menu .pp-image-upload { display:flex; align-items:center; justify-content:flex-start; gap:10px; min-height:40px; height:auto; width:100%; padding:8px 10px; text-align:left; font-size:12px; font-weight:400; border:0; border-radius:4px; background:transparent; cursor:pointer; }
+.pp-editor-workbench .pp-format-menu button:hover,.pp-editor-workbench .pp-format-menu .pp-image-upload:hover { background:var(--color-base-200); }
+.pp-editor-workbench .pp-format-menu button[aria-pressed=true] { color:var(--color-primary); background:var(--color-base-200); }
+.pp-editor-workbench .pp-image-upload:focus-within { outline:2px solid var(--color-primary); outline-offset:1px; }
+.pp-editor-workbench .pp-clarity-trigger { margin-left:auto; display:flex; align-items:center; gap:6px; }
+.pp-editor-document-status { display:flex; flex-wrap:wrap; gap:16px; padding:8px 24px; border-top:1px solid var(--pp-line); background:var(--color-base-100); color:var(--pp-muted); font-size:11px; font-variant-numeric:tabular-nums; }
+.pp-editor-document-status>span:last-child { margin-left:auto; }
+@media (min-width:1024px) {
+ body:has(.pp-document-tools) .pp-editor-layout { grid-template-columns:176px minmax(0,1fr); gap:24px; padding:24px 24px 40px; }
+ body:has(.pp-document-tools) .pp-editor-paper { max-width:816px; border-radius:6px; }
+ body:has(.pp-document-tools) .pp-editor-paper .tiptap-content { padding:40px 48px; font-size:15px; line-height:1.75; }
+ body:has(.pp-document-tools) .pp-editor-paper .tiptap-content h1 { font-size:28px; }
+ body:has(.pp-document-tools) .pp-editor-paper .tiptap-content h2 { font-size:22px; }
+ body:has(.pp-document-tools) .pp-editor-paper .tiptap-content h3 { font-size:18px; }
+}
+@media (max-width:640px) {
+ .pp-editor-toolbar.pp-editor-workbench { position:relative; top:auto; padding:4px 8px; }
+ .pp-format-dropdown>summary { min-width:112px!important; }
+ .pp-editor-workbench .pp-format-menu { max-width:calc(100vw - 32px); }
+ .pp-insert-dropdown .pp-format-menu,.pp-table-dropdown .pp-format-menu { left:auto; right:0; }
+ .pp-editor-document-status { padding:8px 16px; gap:8px; }
+}
+@media print { .pp-editor-document-status { display:none!important; } }
+.pp-editor-workbench details:not([open])>.pp-format-menu { display:none; }
+
+/* Browser-managed popovers are outside layout, even when expanded. */
+.pp-editor-workbench .pp-paragraph-select { flex:0 0 136px; width:136px; height:40px; min-height:40px; padding:8px 28px 8px 12px; border:0; border-radius:4px; font-size:12px; font-weight:500; background-color:transparent; box-shadow:none; }
+.pp-editor-workbench .pp-toolbar-popover { position:fixed; inset:auto; margin:0; width:208px; max-width:calc(100vw - 16px); max-height:calc(100dvh - 160px); overflow:auto; }
+.pp-editor-workbench .pp-toolbar-popover:not(:popover-open) { display:none; }
+.pp-editor-workbench .pp-toolbar-popover:popover-open { display:flex; }
+.pp-toolbar-popover::backdrop { background:transparent; }
+
+.pp-editor-paper .tiptap-content ul[data-type="taskList"][data-completed-style="plain"]>li:has(>label input:checked)>div>p { color:inherit; text-decoration:none; }
+.pp-editor-workbench .pp-menu-caption { padding:6px 10px; margin:0; color:var(--pp-muted); font-size:11px; line-height:1.5; }
+.pp-editor-workbench .pp-format-menu hr { margin:4px 0; border:0; border-top:1px solid var(--pp-line); }
+.pp-editor-workbench .pp-menu-shortcut { margin-left:auto; color:var(--pp-muted); font-size:10px; white-space:nowrap; }
+.pp-editor-workbench .pp-format-menu button:disabled { opacity:.4; cursor:default; }
+.pp-editor-workbench .pp-format-menu button:disabled:hover { background:transparent; }
+.pp-editor-workbench .pp-toolbar-popover { width:248px; }
+
+.pp-editor-workbench .pp-type-properties { display:grid; gap:6px; padding:6px 8px; }
+.pp-editor-workbench .pp-type-properties label { display:grid; grid-template-columns:56px minmax(0,1fr); align-items:center; gap:8px; font-size:12px; line-height:16px; color:var(--pp-muted); padding:0; min-height:28px; white-space:nowrap; }
+.pp-editor-workbench .pp-type-properties .select { min-width:0; width:100%; height:28px; min-height:28px; padding-block:2px; padding-inline:8px 24px; font-size:12px; background-color:var(--color-base-200); }
+.pp-editor-workbench .pp-type-properties input[type="color"] { width:36px; height:24px; padding:2px; cursor:pointer; border:1px solid var(--pp-line); border-radius:4px; }
+.pp-editor-paper .tiptap-content blockquote { margin:16px 0; padding:4px 16px; border-left:3px solid var(--pp-line); color:var(--pp-muted); }
+.pp-editor-paper .tiptap-content hr { margin:24px 0; border:0; border-top:1px solid var(--pp-line); }
+
+/* Desktop editing uses compact controls; touch targets remain spacious. */
+@media (min-width:768px) {
+ .pp-editor-header { height:48px; min-height:48px; padding:0 20px; gap:16px; flex-wrap:nowrap; }
+ .pp-editor-header .pp-editor-title { font-size:14px; }
+ .pp-editor-header .pp-editor-back { font-size:13px; }
+ .pp-editor-header .pp-editor-status { font-size:11px; }
+ .pp-editor-header .pp-editor-actions .btn { height:32px; min-height:32px; padding:4px 12px; font-size:12px; }
+ .pp-editor-header .pp-editor-actions .pp-badge { font-size:11px; }
+ .pp-editor-toolbar.pp-editor-workbench { top:48px; min-height:40px; padding:4px 12px; gap:0; }
+ .pp-editor-workbench>button { height:32px; min-height:32px; min-width:32px; padding:4px 8px; font-size:12px; }
+ .pp-editor-workbench>button>svg { width:15px; height:15px; }
+ .pp-editor-workbench .pp-paragraph-select { height:32px; min-height:32px; flex-basis:116px; width:116px; padding-block:4px; font-size:12px; }
+ .pp-editor-workbench .pp-toolbar-divider { height:18px; margin-inline:4px; }
+ .pp-editor-workbench .pp-format-menu button,.pp-editor-workbench .pp-format-menu .pp-image-upload { min-height:30px; padding:5px 8px; gap:8px; font-size:12px; line-height:20px; }
+ .pp-editor-workbench .pp-menu-caption { font-size:10px; padding:4px 8px; }
+ .pp-editor-workbench .pp-toolbar-popover { padding:4px; width:240px; }
+ .pp-document-tools { top:104px; width:56px; }
+ .pp-document-tools summary.btn { height:48px; min-height:48px; font-size:10px; gap:4px; padding:6px 4px; }
+ .pp-document-tools .pp-product-panel { top:104px; max-height:calc(100dvh - 120px); }
+ .pp-editor-outline { top:104px; }
+ .pp-editor-outline button { font-size:12px; padding:6px 8px; line-height:20px; }
+ .pp-editor-outline h2 { font-size:11px; margin:8px 0; }
+}
+
+/* Hybrid laptops and embedded browsers can report a coarse primary pointer. */
+@media (pointer:coarse) and (min-width:768px) {
+ .pp-editor-workbench>button { min-height:40px; min-width:40px; }
+ .pp-editor-workbench .pp-paragraph-select { height:40px; min-height:40px; }
+ .pp-editor-toolbar.pp-editor-workbench { min-height:48px; }
+ .pp-editor-workbench .pp-format-menu button,.pp-editor-workbench .pp-format-menu .pp-image-upload { min-height:40px; }
+}
+
+.pp-editor-workbench .pp-toolbar-popover { max-height:calc(100dvh - 16px); }
+.pp-editor-workbench .pp-color-palette { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:4px; padding:8px; }
+.pp-editor-workbench .pp-color-palette .pp-color-swatch { width:100%; min-width:0; height:28px; min-height:28px; padding:0; border-radius:4px; border:1px solid color-mix(in srgb,var(--pp-ink) 16%,transparent); }
+.pp-editor-workbench .pp-color-palette .pp-color-swatch[aria-pressed=true] { outline:2px solid var(--color-primary); outline-offset:1px; }
+.pp-editor-workbench .pp-custom-color { display:flex; align-items:center; justify-content:space-between; padding:8px; font-size:12px; color:var(--pp-muted); }
+.pp-editor-workbench .pp-custom-color input { width:32px; height:24px; padding:2px; border:1px solid var(--pp-line); border-radius:4px; }
+@media (pointer:coarse) { .pp-editor-workbench .pp-color-palette .pp-color-swatch { height:36px; min-height:36px; } }
+
+.pp-type-size-row { display:grid; grid-template-columns:56px minmax(0,1fr); align-items:center; gap:8px; font-size:12px; color:var(--pp-muted); }
+.pp-editor-workbench .pp-font-size-controls { display:grid; grid-template-columns:28px minmax(0,1fr) 28px; gap:2px; }
+.pp-editor-workbench .pp-font-size-controls button { width:28px; height:28px; min-height:28px; padding:0; justify-content:center; }
+.pp-editor-workbench .pp-font-size-controls .input { width:100%; min-width:0; height:28px; min-height:28px; font-size:12px; padding:2px 4px; text-align:center; }
+.pp-font-size-field>span { font-size:11px; color:var(--color-danger); }
+.pp-link-dialog { width:360px; max-width:calc(100vw - 32px); margin:auto; border:1px solid var(--pp-line); border-radius:8px; padding:20px; background:var(--color-base-100); color:var(--pp-ink); }
+.pp-link-dialog::backdrop { background:color-mix(in srgb,var(--pp-ink) 24%,transparent); }
+.pp-link-dialog form { display:grid; gap:12px; }
+.pp-link-dialog h2 { font-size:16px; font-weight:600; }
+.pp-link-dialog label,.pp-link-dialog p { font-size:12px; }
+.pp-link-dialog input { width:100%; font-size:13px; }
+.pp-link-dialog form>div { display:flex; justify-content:flex-end; gap:8px; }
+.pp-link-dialog .btn { height:36px; min-height:36px; font-size:12px; padding:6px 12px; }
+
+.pp-slash-menu { position:fixed; z-index:45; width:256px; max-width:calc(100vw - 16px); max-height:min(300px,calc(100dvh - 16px)); overflow:auto; padding:4px; border:1px solid var(--pp-line); border-radius:8px; background:var(--color-base-100); box-shadow:0 6px 20px color-mix(in srgb,var(--pp-ink) 12%,transparent); }
+.pp-slash-menu[hidden] { display:none; }
+.pp-slash-menu>p { padding:6px 8px; font-size:11px; color:var(--pp-muted); }
+.pp-slash-menu>p>span { display:block; font-size:10px; margin-top:4px; }
+.pp-slash-menu>button { display:grid; width:100%; gap:2px; padding:6px 8px; text-align:left; border-radius:4px; font-size:12px; }
+.pp-slash-menu>button>span { color:var(--pp-muted); font-size:11px; }
+.pp-slash-menu>button[aria-selected=true] { background:var(--color-base-200); color:var(--color-primary); }
+
+.pp-typing-help { padding:4px 8px; font-size:12px; line-height:1.6; color:var(--pp-muted); }
+.pp-typing-help p { margin-bottom:8px; }
+.pp-typing-help kbd { font:inherit; color:var(--pp-ink); font-weight:500; }
+
+/* Primary text inputs stay in the toolbar rather than a property form. */
+.pp-editor-workbench>.pp-font-size-field .pp-font-size-controls input { height:28px; min-height:28px; padding:2px; border:1px solid var(--pp-line); border-radius:4px; }
+.pp-editor-workbench>.pp-font-size-field>span[role="alert"] { position:absolute; top:calc(100% + 8px); left:0; width:208px; padding:8px; border:1px solid var(--pp-line); border-radius:4px; background:var(--color-base-100); box-shadow:0 4px 12px color-mix(in srgb,var(--pp-ink) 8%,transparent); }
+
+/* Toolbar fields are bounded instruments, not expanding form inputs. */
+.pp-editor-toolbar.pp-editor-workbench { flex-wrap:wrap; overflow:visible; box-sizing:border-box; min-width:0; max-width:100%; column-gap:0; row-gap:2px; }
+.pp-editor-workbench>.pp-font-size-field { position:relative; }
+@media (min-width:768px) {
+ .pp-editor-toolbar.pp-editor-workbench { padding:4px 10px; }
+ .pp-editor-workbench>button { height:28px; min-height:28px; min-width:28px; padding:4px; gap:2px; }
+ .pp-editor-workbench>button[aria-label="Checklist options"] { min-width:16px; padding-inline:2px; margin-left:-2px; }
+ .pp-editor-workbench .pp-paragraph-select { flex:0 0 100px; width:100px; min-width:0; height:28px; min-height:28px; padding:2px 20px 2px 6px; }
+ .pp-editor-workbench .pp-toolbar-divider { margin-inline:4px; }
+}
+@media (pointer:coarse) {
+ .pp-editor-workbench>button { min-height:36px; min-width:32px; }
+ .pp-editor-workbench>button[aria-label="Checklist options"] { min-width:24px; }
+}
+.pp-editor-workbench>.pp-font-family-select { background-color:transparent; box-shadow:none; border:0; text-overflow:ellipsis; min-inline-size:0; max-inline-size:104px; border-color:transparent; border-radius:3px; }
+.pp-editor-workbench>.pp-font-size-field .pp-font-size-controls { align-items:center; }
+.pp-editor-workbench>.pp-font-size-field .pp-font-size-controls .input { box-sizing:border-box; border-radius:3px; box-shadow:none; }
+
+/* Editor menus use one compact surface; color choices are swatches, not tiles. */
+.pp-editor-workbench .pp-toolbar-popover {
+ --pp-menu-row:28px;
+ width:224px; padding:4px; gap:0; border-radius:6px;
+ border-color:color-mix(in srgb,var(--pp-ink) 12%,transparent);
+ box-shadow:0 2px 4px color-mix(in srgb,var(--pp-ink) 6%,transparent),0 8px 20px color-mix(in srgb,var(--pp-ink) 8%,transparent);
+ font-size:12px; line-height:1.4;
+}
+.pp-editor-workbench .pp-toolbar-popover button,
+.pp-editor-workbench .pp-toolbar-popover .pp-image-upload {
+ min-height:var(--pp-menu-row); padding:4px 8px; gap:8px; font-size:12px; line-height:20px; border-radius:3px;
+}
+.pp-editor-workbench .pp-toolbar-popover button>svg { width:15px; height:15px; flex-shrink:0; }
+.pp-editor-workbench .pp-toolbar-popover button:focus-visible {
+ outline:2px solid var(--color-primary); outline-offset:-2px;
+}
+.pp-editor-workbench .pp-toolbar-popover .pp-menu-caption { margin:0; padding:6px 8px; font-size:10px; line-height:14px; }
+.pp-editor-workbench .pp-toolbar-popover--palette { width:248px; }
+.pp-editor-workbench .pp-toolbar-popover--palette .pp-color-palette {
+ grid-template-columns:repeat(10,20px); gap:3px; padding:8px 6px;
+}
+.pp-editor-workbench .pp-toolbar-popover--palette .pp-color-palette .pp-color-swatch {
+ width:20px; min-width:20px; max-width:20px; height:20px; min-height:20px;
+ padding:0; border-radius:50%; box-sizing:border-box;
+}
+.pp-editor-workbench .pp-color-palette .pp-color-swatch[aria-pressed=true] {
+ outline:2px solid var(--color-primary); outline-offset:1px;
+ box-shadow:inset 0 0 0 2px var(--color-base-100);
+}
+.pp-editor-workbench .pp-toolbar-popover--palette .pp-custom-color {
+ border-top:1px solid var(--pp-line); margin-top:4px; padding:8px; font-size:11px;
+}
+.pp-editor-workbench .pp-toolbar-popover--palette .pp-custom-color input { width:24px; height:22px; }
+.pp-editor-workbench .pp-toolbar-popover--alignment { width:160px; }
+.pp-editor-workbench>button[aria-expanded=true] { background:var(--color-base-300); }
+@media (pointer:coarse) {
+ .pp-editor-workbench .pp-toolbar-popover { --pp-menu-row:36px; }
+ .pp-editor-workbench .pp-toolbar-popover--palette { width:248px; }
+ .pp-editor-workbench .pp-toolbar-popover--palette .pp-color-palette { grid-template-columns:repeat(6,32px); gap:6px; padding:8px; }
+ .pp-editor-workbench .pp-toolbar-popover--palette .pp-color-palette .pp-color-swatch { width:32px; min-width:32px; max-width:32px; height:32px; min-height:32px; }
+}
+
+/* Placement belongs to popoverPlacement(), never CSS anchor positioning. */
+.pp-editor-workbench .pp-toolbar-popover {
+ position:fixed; position-anchor:auto; position-area:none;
+ right:auto; bottom:auto; margin:0; height:auto; min-height:0;
+ box-sizing:border-box; flex-shrink:0;
+}
+.pp-editor-workbench .pp-toolbar-popover>button,
+.pp-editor-workbench .pp-toolbar-popover>.pp-menu-caption,
+.pp-editor-workbench .pp-toolbar-popover>.pp-type-properties,
+.pp-editor-workbench .pp-toolbar-popover>.pp-color-palette,
+.pp-editor-workbench .pp-toolbar-popover>.pp-custom-color { flex-shrink:0; }
+
+/* Document home: the library leads, navigation and creation stay quiet. */
+.pp-library-workspace { background:var(--pp-canvas); }
+.pp-library-workspace .pp-sidebar { width:200px; padding:20px 12px; background:var(--pp-canvas); color:var(--pp-ink); border-right:1px solid var(--pp-line); }
+.pp-library-workspace .pp-app-main { margin-left:200px; width:calc(100% - 200px); }
+.pp-library-workspace .pp-sidebar-brand { padding:0 8px 12px; }
+.pp-library-workspace .pp-sidebar nav a { padding:8px 10px; gap:10px; font-size:13px; color:var(--pp-muted); border-radius:6px; min-height:36px; }
+.pp-library-workspace .pp-sidebar nav a:hover { background:var(--color-base-200); color:var(--pp-ink); }
+.pp-library-workspace .pp-sidebar nav .pp-nav-active { background:var(--color-base-300); color:var(--color-primary); }
+.pp-library-workspace .pp-current-user strong { color:var(--pp-ink); font-size:12px; }
+.pp-library-workspace .pp-current-user>div>button { color:var(--pp-muted); }
+.pp-library-workspace .pp-sidebar-bottom { padding:8px 0; }
+.pp-navigation-toggle.btn { min-height:28px; height:28px; width:28px; padding:4px; margin:0 8px 12px; }
+.pp-library-workspace .pp-workspace-header { height:60px; gap:16px; padding:0 24px; }
+.pp-library-workspace .pp-workspace-header .btn { height:36px; min-height:36px; font-size:12px; padding:6px 12px; }
+.pp-library-workspace .pp-search { height:36px; min-height:36px; max-width:640px; }
+.pp-library-workspace .pp-search input { font-size:13px; }
+.pp-library-workspace .pp-starters { padding:24px 32px; background:var(--pp-canvas); }
+.pp-library-workspace .pp-starters h1 { margin-bottom:16px; font-size:14px; }
+.pp-library-workspace .pp-starters h1::after { display:none; }
+.pp-library-workspace .pp-starter-grid { grid-template-columns:repeat(4,minmax(0,144px)); gap:20px; }
+.pp-library-workspace .pp-starter-page { height:152px; border-radius:4px; margin-bottom:8px; }
+.pp-library-workspace .pp-starter-page>svg { width:28px; height:28px; }
+.pp-library-workspace .pp-starter>strong { font-size:12px; line-height:18px; font-weight:500; }
+.pp-library-workspace .pp-starter>span:last-child { font-size:11px; line-height:16px; margin-top:2px; }
+.pp-starter-content { display:flex; flex-direction:column; align-self:stretch; width:100%; padding:16px 12px; color:var(--pp-ink); text-align:left; }
+.pp-starter-preview-title { font-size:11px; font-weight:600; line-height:16px; margin-bottom:12px; }
+.pp-starter-preview-heading { font-size:8px; font-weight:500; line-height:12px; margin-bottom:14px; }
+.pp-library-workspace .pp-library { padding:20px 32px 32px; }
+.pp-library-workspace .pp-section-heading { margin-bottom:16px; }
+.pp-library-workspace .pp-section-heading h1 { font-size:16px; }
+.pp-library-workspace .pp-doc-grid { grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+.pp-library-workspace .pp-document-card { border-radius:6px; }
+.pp-library-workspace .pp-document-card .pp-doc-card-body { padding:12px; }
+.pp-library-workspace .pp-document-card .pp-doc-card-title { margin-bottom:12px; }
+.pp-library-workspace .pp-doc-name { font-size:13px; }
+.pp-library-workspace .pp-doc-excerpt { font-size:12px; margin-top:6px; }
+.pp-library-workspace .pp-document-empty .pp-doc-open { min-height:44px; }
+.pp-library-workspace .pp-document-empty .pp-doc-excerpt { min-height:0; }
+.pp-library-workspace .pp-doc-meta { font-size:11px; }
+@media(min-width:901px) {
+ .pp-navigation-collapsed .pp-sidebar { width:64px; padding-inline:8px; }
+ .pp-navigation-collapsed .pp-app-main { margin-left:64px; width:calc(100% - 64px); }
+ .pp-navigation-collapsed .pp-sidebar-brand { padding-inline:8px; }
+ .pp-navigation-collapsed .pp-sidebar nav a { justify-content:center; padding:8px; }
+ .pp-navigation-collapsed .pp-sidebar nav a>span,.pp-navigation-collapsed .pp-current-user>div { display:none; }
+ .pp-navigation-collapsed .pp-current-user { flex-direction:column; }
+}
+@media(max-width:900px) {
+ .pp-library-workspace .pp-sidebar { width:200px; }
+ .pp-library-workspace .pp-app-main { margin-left:0; width:100%; }
+ .pp-navigation-toggle { display:none; }
+ .pp-library-workspace .pp-starters,.pp-library-workspace .pp-library { padding:20px; }
+}
+@media(max-width:600px) {
+ .pp-library-workspace .pp-starter-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+ .pp-library-workspace .pp-workspace-header { height:auto; min-height:60px; padding:12px; flex-wrap:wrap; }
+ .pp-library-workspace .pp-search { flex:1; min-width:120px; }
+ .pp-library-workspace .pp-header-actions { width:100%; justify-content:flex-end; }
+}
+
+/* Shared authenticated workspace geometry. */
+.pp-library-workspace .pp-sidebar-brand { min-height:36px; gap:8px; padding:0 4px; margin-bottom:20px; }
+.pp-library-workspace .pp-sidebar-brand>a { min-width:0; }
+.pp-library-workspace .pp-sidebar-brand .pp-navigation-toggle { flex-shrink:0; margin:0; }
+.pp-library-workspace .pp-starter-grid { align-items:start; }
+.pp-library-workspace .pp-starter { display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; height:auto; }
+.pp-library-workspace .pp-starter-page { flex-shrink:0; width:100%; }
+.pp-library-workspace .pp-starter>span:last-child { min-height:32px; }
+.pp-sidebar-account { position:relative; margin-top:24px; }
+.pp-sidebar-account>summary { display:flex; align-items:center; gap:8px; padding:8px 4px; cursor:pointer; border-radius:6px; list-style:none; }
+.pp-sidebar-account>summary::-webkit-details-marker { display:none; }
+.pp-sidebar-account>summary:hover,.pp-sidebar-account[open]>summary { background:var(--color-base-200); }
+.pp-account-identity { flex:1; min-width:0; display:grid; gap:2px; }
+.pp-account-identity strong { font-size:12px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pp-account-identity>span { font-size:10px; color:var(--pp-muted); }
+.pp-account-menu { position:absolute; bottom:calc(100% + 4px); left:0; width:184px; padding:4px; border:1px solid var(--pp-line); border-radius:6px; background:var(--color-base-100); box-shadow:0 4px 16px color-mix(in srgb,var(--pp-ink) 10%,transparent); }
+.pp-account-menu>a,.pp-account-menu>button { display:flex; align-items:center; gap:8px; width:100%; min-height:32px; padding:6px 8px; font-size:12px; border-radius:4px; color:var(--pp-ink); text-align:left; }
+.pp-account-menu>a:hover,.pp-account-menu>button:hover { background:var(--color-base-200); }
+.pp-sidebar-account summary:focus-visible,.pp-account-menu a:focus-visible,.pp-account-menu button:focus-visible { outline:2px solid var(--color-primary); outline-offset:2px; }
+.pp-route-header { border-bottom:1px solid var(--pp-line); justify-content:flex-start; }
+.pp-route-header>span { font-size:13px; font-weight:500; color:var(--pp-muted); }
+.pp-workspace-page.pp-product-page { min-height:calc(100svh - 60px); background:var(--pp-canvas); padding:28px 32px; display:flex; flex-direction:column; }
+.pp-workspace-page.pp-product-page>.pp-product-content { width:100%; max-width:960px; margin:0; }
+.pp-workspace-page.pp-product-page h1 { font-size:22px; line-height:28px; letter-spacing:-.4px; margin-bottom:8px; }
+.pp-workspace-page.pp-product-page h2 { font-size:15px; line-height:22px; margin-bottom:8px; }
+.pp-workspace-page.pp-product-page h3 { font-size:14px; }
+.pp-workspace-page.pp-product-page p { font-size:13px; line-height:1.6; max-width:76ch; }
+.pp-workspace-page.pp-product-page .pp-product-description { color:var(--pp-muted); margin-bottom:24px; font-size:13px; }
+.pp-workspace-page .pp-settings-section { margin:0; padding:20px 0; border-bottom:1px solid var(--pp-line); }
+.pp-workspace-page .pp-settings-section>p { margin:0 0 12px; }
+.pp-workspace-page .btn { font-size:12px; height:32px; min-height:32px; padding:4px 10px; }
+.pp-workspace-page .pp-product-form { max-width:400px; gap:12px; margin-top:16px; }
+.pp-workspace-page .pp-product-form label { font-size:12px; }
+.pp-workspace-page .pp-product-form .input { height:36px; min-height:36px; font-size:13px; }
+.pp-workspace-page.pp-product-page footer { justify-content:flex-start; margin-top:auto; padding-top:32px; gap:20px; font-size:11px; }
+.pp-review-filters.pp-product-actions { gap:4px; margin:0 0 24px; padding-bottom:8px; border-bottom:1px solid var(--pp-line); }
+.pp-review-filters.pp-product-actions .btn { color:var(--pp-muted); background:transparent; box-shadow:none; border:0; border-radius:4px; font-weight:500; }
+.pp-review-filters.pp-product-actions .btn[aria-pressed=true] { color:var(--color-primary); background:var(--color-base-300); }
+.pp-review-empty { padding:16px 0; }
+.pp-review-empty>p { color:var(--pp-muted); }
+.pp-workspace-page .pp-product-row { padding:12px 0; gap:16px; }
+@media(min-width:901px) {
+ .pp-navigation-collapsed .pp-sidebar-brand { flex-direction:column; gap:12px; }
+ .pp-navigation-collapsed .pp-sidebar-account>summary { justify-content:center; }
+ .pp-navigation-collapsed .pp-account-identity,.pp-navigation-collapsed .pp-sidebar-account>summary>svg { display:none; }
+}
+@media(max-width:900px) { .pp-workspace-page.pp-product-page { padding:24px 20px; } }
+@media(max-width:600px) { .pp-workspace-page.pp-product-page { padding:20px 16px; } .pp-workspace-page .pp-review-filters { flex-wrap:wrap; } }
+
+/* One sidebar breakpoint and one stable toggle position. */
+.pp-library-workspace .pp-sidebar { height:100dvh; overflow:visible; }
+.pp-library-workspace .pp-sidebar>div:first-child { min-height:0; overflow-y:auto; overflow-x:hidden; }
+.pp-library-workspace .pp-sidebar-brand { display:flex; flex-direction:row; align-items:center; justify-content:flex-start; gap:8px; min-height:36px; }
+.pp-library-workspace .pp-sidebar-brand .pp-navigation-toggle { display:inline-flex; width:32px; min-width:32px; height:32px; min-height:32px; padding:6px; }
+.pp-library-workspace .pp-sidebar-brand .pp-navigation-toggle svg { transition:transform 180ms cubic-bezier(.23,1,.32,1); }
+.pp-library-workspace .pp-sidebar-brand>a { flex:1; }
+.pp-library-workspace .pp-sidebar-brand .pp-logo { max-width:120px; }
+.pp-library-workspace .pp-sidebar nav a { min-height:36px; }
+@media(min-width:901px) {
+ .pp-library-workspace .pp-sidebar { transform:none; visibility:visible; }
+ .pp-navigation-collapsed .pp-sidebar-brand { flex-direction:row; justify-content:center; gap:0; }
+ .pp-navigation-collapsed .pp-sidebar-brand>a { display:none; }
+ .pp-navigation-collapsed .pp-navigation-toggle svg { transform:rotate(90deg); }
+ .pp-library-workspace .pp-sidebar nav { animation:pp-navigation-enter 180ms cubic-bezier(.23,1,.32,1); }
+ .pp-navigation-collapsed .pp-sidebar nav { animation:pp-navigation-compact 180ms cubic-bezier(.23,1,.32,1); }
+ .pp-library-workspace .pp-mobile-close,.pp-library-workspace .pp-mobile-menu,.pp-library-workspace .pp-drawer-backdrop { display:none !important; }
+}
+@keyframes pp-navigation-enter { from { opacity:.6; transform:translateX(-6px); } to { opacity:1; transform:translateX(0); } }
+@keyframes pp-navigation-compact { from { opacity:.6; transform:translateX(4px); } to { opacity:1; transform:translateX(0); } }
+@media(max-width:900px) {
+ .pp-library-workspace .pp-sidebar { width:min(280px,calc(100vw - 48px)); padding:16px 12px; z-index:50; transform:translateX(-100%); visibility:hidden; transition:transform 200ms cubic-bezier(.23,1,.32,1),visibility 200ms; }
+ .pp-library-workspace .pp-sidebar.pp-sidebar-open { transform:translateX(0); visibility:visible; }
+ .pp-library-workspace .pp-sidebar-brand .pp-navigation-toggle { display:none; }
+ .pp-library-workspace .pp-mobile-close { display:inline-flex; width:36px; min-width:36px; height:36px; padding:8px; color:var(--pp-ink); }
+ .pp-library-workspace .pp-mobile-menu { display:inline-flex !important; align-items:center; justify-content:center; width:36px !important; min-width:36px; height:36px !important; min-height:36px !important; padding:8px !important; flex-shrink:0; }
+ .pp-library-workspace .pp-drawer-backdrop { position:fixed; inset:0; z-index:45; background:color-mix(in srgb,var(--pp-ink) 30%,transparent); animation:pp-navigation-backdrop 160ms ease-out; }
+ .pp-library-workspace .pp-app-main { margin-left:0; width:100%; }
+ .pp-library-workspace .pp-sidebar nav a { min-height:40px; }
+ .pp-library-workspace .pp-workspace-header { gap:12px; }
+}
+@keyframes pp-navigation-backdrop { from { opacity:0; } to { opacity:1; } }
+@media(prefers-reduced-motion:reduce) {
+ .pp-library-workspace .pp-sidebar,.pp-library-workspace .pp-navigation-toggle svg { transition:none; }
+ .pp-library-workspace .pp-sidebar nav,.pp-library-workspace .pp-drawer-backdrop { animation:none; }
+}
+
+/* The font size list belongs to the editor, not the browser autocomplete UI. */
+.pp-editor-workbench>.pp-font-size-field { flex:0 0 88px; width:88px; min-width:88px; max-width:88px; }
+.pp-editor-workbench>.pp-font-size-field .pp-font-size-controls { display:grid; grid-template-columns:24px 36px 24px; gap:2px; align-items:center; }
+.pp-editor-workbench>.pp-font-size-field .pp-font-size-controls button { width:24px; min-width:24px; max-width:24px; height:28px; min-height:28px; padding:0; }
+.pp-editor-workbench>.pp-font-size-field .pp-font-size-controls .input { width:36px; min-width:0; max-width:36px; height:24px; min-height:24px; padding:1px 2px; font-size:12px; text-align:center; font-variant-numeric:tabular-nums; }
+.pp-font-size-menu { position:fixed; position-anchor:auto; position-area:none; inset:auto; margin:0; width:64px; height:auto; max-height:min(240px,calc(100dvh - 16px)); overflow-y:auto; overscroll-behavior:contain; padding:4px; border:1px solid var(--pp-line); border-radius:4px; background:var(--color-base-100); color:var(--pp-ink); box-shadow:0 3px 10px color-mix(in srgb,var(--pp-ink) 12%,transparent); scrollbar-width:thin; }
+.pp-font-size-menu:not(:popover-open) { display:none; }
+.pp-font-size-menu:popover-open { display:block; }
+.pp-editor-workbench .pp-font-size-menu>button { display:block; width:100%; height:26px; min-height:26px; padding:3px 8px; border:0; border-radius:2px; background:transparent; color:var(--pp-ink); font-size:12px; line-height:20px; text-align:center; font-variant-numeric:tabular-nums; }
+.pp-editor-workbench .pp-font-size-menu>button:hover,.pp-editor-workbench .pp-font-size-menu>button[data-active=true] { background:var(--color-base-200); }
+.pp-editor-workbench .pp-font-size-menu>button[aria-selected=true] { color:var(--color-primary); background:var(--color-base-300); font-weight:600; }
+.pp-font-size-menu::backdrop { background:transparent; }
+@media(pointer:coarse) { .pp-font-size-menu { width:76px; max-height:min(280px,calc(100dvh - 16px)); } .pp-editor-workbench .pp-font-size-menu>button { height:36px; min-height:36px; } }
+
+/* Keep preset scrolling without spending menu width on browser scrollbar chrome. */
+.pp-font-size-menu { scrollbar-width:none; }
+.pp-font-size-menu::-webkit-scrollbar { display:none; width:0; height:0; }
+
+/* Shrink only the painted checkbox indicator; keep its label hit area. */
+.pp-editor-paper .tiptap-content ul[data-type="taskList"]>li>label input[type="checkbox"] { transform:scale(.75); transform-origin:center; }

@@ -3,22 +3,17 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Home,
-  Files,
-  Users,
   Search,
   Plus,
-  Upload,
   LayoutGrid,
   List,
   Menu,
   X,
   ArrowRight,
   FileText,
-  Settings,
   LogOut,
 } from "lucide-react";
-import PlainpageLogo from "@/components/PlainpageLogo";
+import { WorkspaceSidebar, useWorkspaceNavigation } from "@/components/WorkspaceSidebar";
 import { Button } from "@/components/Button";
 import { Badge } from "@/components/Badge";
 import { UploadButton } from "@/components/UploadButton";
@@ -64,6 +59,7 @@ export function DashboardContent({
   initialTab?: TabType;
 }) {
   const router = useRouter();
+  const [collapsed,setCollapsed] = useWorkspaceNavigation();
   const [user, setUser] = useState<Person | null>(null),
     [owned, setOwned] = useState<Item[]>([]),
     [shared, setShared] = useState<Item[]>([]),
@@ -280,7 +276,7 @@ export function DashboardContent({
       <div className={view === "grid" ? "pp-doc-grid" : "pp-doc-list"}>
         {items.map((d) => (
           <article
-            className={`card pp-document-card ${view === "list" ? "pp-list-card" : ""}`}
+            className={`card pp-document-card ${!d.excerpt?.trim() ? "pp-document-empty" : ""} ${view === "list" ? "pp-list-card" : ""}`}
             key={d.id}
           >
             <div className="pp-doc-card-body">
@@ -322,81 +318,13 @@ export function DashboardContent({
     );
   }
   return (
-    <div className="pp-app">
-      {drawer && (
-        <button
-          className="pp-drawer-backdrop"
-          aria-label="Close navigation"
-          onClick={() => setDrawer(false)}
-        />
-      )}
-      <aside className={`pp-sidebar ${drawer ? "pp-sidebar-open" : ""}`}>
-        <div>
-          <div className="pp-sidebar-brand">
-            <Link href="/" aria-label="Plainpage home">
-              <PlainpageLogo theme="dark" size="md" />
-            </Link>
-            <button
-              className="pp-mobile-close"
-              aria-label="Close navigation"
-              onClick={() => setDrawer(false)}
-            >
-              <X size={20} />
-            </button>
-          </div>
-          <nav aria-label="Main navigation">
-            {[
-              [Home, "home", "Home", "/"],
-              [Files, "documents", "Documents", "/documents"],
-              [Users, "shared", "Shared", "/shared"],
-            ].map(([Icon, tab, label, href]) => {
-              const I = Icon as typeof Home;
-              return (
-                <Link
-                  key={String(tab)}
-                  href={String(href)}
-                  onClick={() => setDrawer(false)}
-                  aria-current={initialTab === tab ? "page" : undefined}
-                  className={initialTab === tab ? "pp-nav-active" : ""}
-                >
-                  <I size={20} />
-                  <span>{String(label)}</span>
-                </Link>
-              );
-            })}
-            {user?.productTiers && (
-              <>
-                <Link href="/reviews">Reviews</Link>
-                <Link href="/trash">Trash</Link>
-              </>
-            )}
-            <Link href="/account">Account and data</Link>
-          </nav>
-        </div>
-        <div className="pp-sidebar-bottom">
-          <div className="pp-current-user">
-            <span className="pp-avatar">
-              {user?.name[0]?.toUpperCase() || "…"}
-            </span>
-            <div>
-              <strong>{user?.name || "Loading…"}</strong>
-              <button onClick={logout}>Log out</button>
-            </div>
-            <button
-              className="pp-settings-trigger"
-              aria-label="Account settings"
-              onClick={() => setSettings(true)}
-            >
-              <Settings size={17} />
-            </button>
-          </div>
-        </div>
-      </aside>
+    <div className={`pp-app pp-library-workspace ${collapsed ? "pp-navigation-collapsed" : ""}`}>
+      <WorkspaceSidebar user={user} active={initialTab === "home" ? "/" : `/${initialTab}`} drawer={drawer} collapsed={collapsed} onClose={() => setDrawer(false)} onToggle={() => setCollapsed(!collapsed)} onLogout={logout} onAccount={() => setSettings(true)} />
       <div className="pp-app-main">
         <header className="pp-workspace-header">
           <button
             className="pp-mobile-menu btn btn-ghost btn-square"
-            aria-label="Open navigation"
+            aria-label="Open navigation" aria-expanded={drawer} aria-controls="workspace-navigation"
             onClick={() => setDrawer(true)}
           >
             <Menu size={20} />
@@ -455,17 +383,6 @@ export function DashboardContent({
                   <strong>Blank document</strong>
                   <span>Start from scratch</span>
                 </button>
-                <div className="pp-starter pp-import-starter">
-                  <div className="pp-starter-page">
-                    <Upload size={38} strokeWidth={1.6} />
-                    <UploadButton
-                      hideHint
-                      onSuccess={(id) => router.push(`/docs/${id}`)}
-                    />
-                  </div>
-                  <strong>Import a file</strong>
-                  <span>.txt, .md, .docx · 2 MB</span>
-                </div>
                 {starters.map((s) => (
                   <button
                     className="pp-starter"
@@ -474,15 +391,13 @@ export function DashboardContent({
                     onClick={() => createDocument(s)}
                   >
                     <span className="pp-starter-page">
-                      <FileText
-                        size={24}
-                        strokeWidth={1.6}
-                        className="pp-document-symbol"
-                        aria-hidden="true"
-                      />
+                      <span className="pp-starter-content" aria-hidden="true">
+                        <span className="pp-starter-preview-title">{s.name}</span>
+                        {s.headings.map(heading => <span className="pp-starter-preview-heading" key={heading}>{heading}</span>)}
+                      </span>
                     </span>
                     <strong>{s.name}</strong>
-                    <span>Starter</span>
+                    <span>{s.copy}</span>
                   </button>
                 ))}
               </div>

@@ -1,5 +1,6 @@
 import {
   Document,
+  AlignmentType,
   Packer,
   Paragraph,
   TextRun,
@@ -10,10 +11,24 @@ import {
   ExternalHyperlink,
 } from "docx";
 import { documentText, type ContentNode } from "./document-export";
+function paragraphFormat(node: ContentNode) {
+  const alignment = { left: AlignmentType.LEFT, center: AlignmentType.CENTER, right: AlignmentType.RIGHT, justify: AlignmentType.JUSTIFIED }[String(node.attrs?.textAlign)];
+  const lineHeight = Number(node.attrs?.lineHeight);
+  return { alignment, spacing: lineHeight >= 1 && lineHeight <= 3 ? { line: Math.round(lineHeight * 240) } : undefined };
+}
 function runs(node: ContentNode): (TextRun | ExternalHyperlink)[] {
   if (node.type === "text") {
     const link = node.marks?.find((m) => m.type === "link");
+    const style = node.marks?.find((m) => m.type === "textStyle")?.attrs;
+    const highlight = node.marks?.find((m) => m.type === "highlight")?.attrs?.color;
+    const color = String(style?.color ?? "");
+    const fill = String(highlight ?? style?.backgroundColor ?? "");
+    const size = parseFloat(String(style?.fontSize ?? ""));
     const text = new TextRun({
+      strike: node.marks?.some((m) => m.type === "strike"),
+      color: /^#[0-9a-f]{6}$/i.test(color) ? color.slice(1) : undefined,
+      size: size >= 8 && size <= 128 ? Math.round(size * 1.5) : undefined,
+      shading: /^#[0-9a-f]{6}$/i.test(fill) ? { fill: fill.slice(1) } : undefined,
       text: node.text ?? "",
       bold: node.marks?.some((m) => m.type === "bold"),
       italics: node.marks?.some((m) => m.type === "italic"),
@@ -22,7 +37,7 @@ function runs(node: ContentNode): (TextRun | ExternalHyperlink)[] {
         : undefined,
       font: node.marks?.some((m) => m.type === "code")
         ? "Courier New"
-        : undefined,
+        : style?.fontFamily ? String(style.fontFamily).split(",")[0].replace(/['"]/g, "") : undefined,
     });
     return link && /^https?:\/\//i.test(String(link.attrs?.href))
       ? [
@@ -64,6 +79,7 @@ function blocks(node: ContentNode, indent = 0): (Paragraph | Table)[] {
   if (node.type === "heading")
     return [
       new Paragraph({
+        ...paragraphFormat(node),
         heading: [
           HeadingLevel.HEADING_1,
           HeadingLevel.HEADING_2,
@@ -74,7 +90,7 @@ function blocks(node: ContentNode, indent = 0): (Paragraph | Table)[] {
     ];
   if (node.type === "paragraph")
     return [
-      new Paragraph({ children: runs(node), indent: { left: indent * 360 } }),
+      new Paragraph({ ...paragraphFormat(node), children: runs(node), indent: { left: indent * 360 } }),
     ];
   if (node.type === "image")
     return [

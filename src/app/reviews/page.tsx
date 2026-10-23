@@ -45,7 +45,7 @@ export default function ReviewsPage() {
       description="Documents waiting on your feedback, and reviews you asked for."
     >
       <div
-        className="pp-product-actions"
+        className="pp-product-actions pp-review-filters"
         role="group"
         aria-label="Review inbox"
       >
@@ -65,7 +65,7 @@ export default function ReviewsPage() {
         ))}
       </div>
       <p role="status">{notice}</p>
-      {!notice && !rows.length && <p>No reviews here yet.</p>}
+      {!notice && !rows.filter(r=>r.documents && !r.documents.deleted_at).length && <div className="pp-review-empty"><h2>{tab === "waiting" ? "No documents need your review" : tab === "requested" ? "You haven’t requested a review yet" : "No completed reviews yet"}</h2><p>{tab === "waiting" ? "When someone assigns you a review, it will appear here." : tab === "requested" ? "Open a document and choose Request review to invite feedback." : "Reviews you finish will appear here."}</p>{tab === "requested" && <Link className="btn btn-ghost" href="/documents">Open documents</Link>}</div>}
       {rows
         .filter((r) => r.documents && !r.documents.deleted_at)
         .map((r) => (
